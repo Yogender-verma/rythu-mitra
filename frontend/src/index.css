@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Telugu:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+:root {
+  --color-agri-primary: #2E7D32;
+  --color-agri-dark: #1B5E20;
+  --color-agri-fresh: #43A047;
+  --color-agri-light: #C8E6C9;
+  --color-agri-soft: #A5D6A7;
+  --color-agri-bg: #F5F8F2;
+  --color-agri-border: #B7C9B3;
+  --color-agri-black: #000000;
+  --color-agri-secondary: #263238;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: #F5F8F2;
+  color: #000000;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Agricultural Green & Black Design System Utilities */
+.bg-farm-pattern {
+  background-color: #F5F8F2;
+  background-image: radial-gradient(#2E7D32 0.5px, transparent 0.5px), radial-gradient(#2E7D32 0.5px, #F5F8F2 0.5px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+.text-telugu {
+  font-family: 'Noto Sans Telugu', 'Inter', sans-serif;
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 2px solid #B7C9B3;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08);
+}
+
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
