@@ -7,10 +7,12 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    firebase_uid = Column(String, unique=True, index=True, nullable=True)
     name = Column(String, default="Telangana Farmer")
     email = Column(String, unique=True, index=True, nullable=True)
     phone = Column(String, unique=True, index=True, nullable=True)
     google_id = Column(String, unique=True, nullable=True)
+    auth_provider = Column(String, default="phone")
     language = Column(String, default="te")  # 'te' or 'en'
     profile_photo = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -36,7 +38,7 @@ class CropScan(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     image_url = Column(Text)
     crop = Column(String)  # Cotton, Paddy, Chilli, Maize
-    crop_stage = Column(String)  # Seedling, Vegetative, Flowering, Fruiting, Harvest
+    crop_stage = Column(String, nullable=True)  # Legacy field, default NULL
     district = Column(String)
     mandal = Column(String)
     diagnosis = Column(String)

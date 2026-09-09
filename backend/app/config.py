@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     AUDIO_DIR: str = "./audio_cache"
 
     class Config:
-        env_file = ".env"
+        env_file = ("../.env", ".env")
         extra = "ignore"
 
 settings = Settings()

@@ -1,6 +1,7 @@
 import uuid
 import datetime
 import base64
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -8,192 +9,174 @@ from ..models.models import CropScan, Advisory, WeatherSnapshot, User
 from ..ml.inference import get_classifier
 from ..services.advisory_engine import AdvisoryEngine
 from ..services.tts_service import TTSService
+from .weather import fetch_real_weather_and_location
 
 router = APIRouter(prefix="/api/scans", tags=["Crop Scans"])
 
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/bmp"}
+
 @router.post("")
+@router.post("/predict")
 async def create_scan(
-    crop: str = Form(...),
-    crop_stage: str = Form(...),
+    crop: Optional[str] = Form(None),
+    crop_stage: Optional[str] = Form(None),
     district: str = Form("Karimnagar"),
     mandal: str = Form("Choppadandi"),
+    lat: Optional[float] = Form(None),
+    lon: Optional[float] = Form(None),
     notes: str = Form(""),
     user_id: int = Form(1),
     file: UploadFile = File(None),
     db: Session = Depends(get_db)
 ):
+    if file and file.content_type and file.content_type.lower() not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file format '{file.content_type}'. Please upload a valid JPG, PNG, or WebP image."
+        )
+
     image_bytes = b""
     if file:
         image_bytes = await file.read()
     
-    # Standard sample fallback image if file empty
-    if not image_bytes:
-        image_url = "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?q=80&w=800&auto=format&fit=crop"
-        image_bytes = b"mock_crop_image_bytes_rythumitra"
-    else:
-        # Create base64 preview format or blob URL
-        encoded = base64.b64encode(image_bytes).decode('utf-8')
-        image_url = f"data:{file.content_type or 'image/jpeg'};base64,{encoded}"
+    if not image_bytes or len(image_bytes) < 100:
+        raise HTTPException(status_code=400, detail="Empty or unreadable image uploaded. Please capture a clear crop photo.")
 
-    # 1. Run ML Diagnosis Classifier
+    encoded = base64.b64encode(image_bytes).decode('utf-8')
+    content_type = file.content_type if file and file.content_type else 'image/jpeg'
+    image_url = f"data:{content_type};base64,{encoded}"
+
+    # 1. Real Weather Lookup (Open-Meteo + Nominatim) if lat/lon provided
+    if lat is not None and lon is not None:
+        weather_info = fetch_real_weather_and_location(lat, lon)
+    else:
+        weather_info = {
+            "is_weather_available": False,
+            "location_name": f"{mandal}, {district}",
+            "temperature": "N/A",
+            "humidity": "N/A",
+            "condition": "Live weather unavailable",
+            "condition_telugu": "లైవ్ వాతావరణ సమాచారం అందుబాటులో లేదు",
+            "weather_code": 0
+        }
+
+    # 2. Run Real PyTorch Crop-Specific ML Classifier
     classifier = get_classifier()
     prediction = classifier.predict(image_bytes, crop)
 
+    is_low_conf = prediction.get("is_low_confidence", False) or prediction.get("confidence", 0.0) < 0.40
+    confidence_val = float(prediction.get("confidence", 0.0))
+    effective_crop = prediction.get("crop", crop or "Cotton")
+
+    # 3. Verified PJTSAU Advisory Generation
+    if is_low_conf:
+        advisory_data = AdvisoryEngine.get_low_confidence_advisory(effective_crop)
+    else:
+        raw_disease = prediction.get("disease", "Healthy")
+        advisory_data = AdvisoryEngine.get_advisory(
+            crop=effective_crop,
+            disease_key=raw_disease,
+            weather_info=weather_info
+        )
+
     scan_id = str(uuid.uuid4())[:12]
-    
-    # 2. Weather Snapshot
-    weather_info = {
-        "temperature": "31°C",
-        "humidity": "72%",
-        "rainfall_probability": "40%",
-        "condition": "Partly Cloudy",
-        "condition_telugu": "పాక్షికంగా మేఘావృతం"
-    }
 
-    # 3. Context-aware Advisory Generation
-    advisory_data = AdvisoryEngine.get_advisory(
-        crop=prediction["crop"],
-        disease=prediction["disease"],
-        crop_stage=crop_stage,
-        weather_condition=weather_info["condition"],
-        risk_level=prediction["risk_level"]
-    )
+    # 4. Generate Telugu Voice Audio (Reads ONLY Why + What To Do)
+    audio_url = TTSService.generate_telugu_audio(scan_id, advisory_data["audio_text_te"])
 
-    # 4. Generate Telugu Voice Audio
-    audio_url = TTSService.generate_telugu_audio(
-        scan_id=scan_id,
-        text=f"{prediction['disease_telugu']}. {advisory_data['recommendation_te']}"
-    )
+    # 5. Database Persistence
+    try:
+        user_record = db.query(User).filter(User.id == user_id).first()
+        if not user_record:
+            user_record = User(id=user_id, name="Telangana Farmer", phone="9999999999")
+            db.add(user_record)
+            db.commit()
 
-    # 5. DB Persistence
-    db_scan = CropScan(
-        id=scan_id,
-        user_id=user_id,
-        image_url=image_url,
-        crop=prediction["crop"],
-        crop_stage=crop_stage,
-        district=district,
-        mandal=mandal,
-        diagnosis=prediction["disease"],
-        confidence=prediction["confidence"],
-        risk_level=prediction["risk_level"]
-    )
-    db.add(db_scan)
-    db.commit()
+        scan_record = CropScan(
+            id=scan_id,
+            user_id=user_id,
+            image_url=image_url,
+            crop=effective_crop,
+            crop_stage=crop_stage,
+            district=district,
+            mandal=mandal,
+            diagnosis=advisory_data["disease_en"],
+            confidence=confidence_val,
+            risk_level=advisory_data["risk_level"]
+        )
+        db.add(scan_record)
 
-    db_weather = WeatherSnapshot(
-        scan_id=scan_id,
-        temperature=weather_info["temperature"],
-        humidity=weather_info["humidity"],
-        rainfall_probability=weather_info["rainfall_probability"],
-        condition=weather_info["condition"]
-    )
-    db.add(db_weather)
+        weather_snapshot = WeatherSnapshot(
+            scan_id=scan_id,
+            temperature=weather_info["temperature"],
+            humidity=weather_info["humidity"],
+            rainfall_probability="N/A",
+            condition=weather_info["condition"]
+        )
+        db.add(weather_snapshot)
 
-    db_advisory = Advisory(
-        scan_id=scan_id,
-        recommendation_en=advisory_data["recommendation_en"],
-        recommendation_te=advisory_data["recommendation_te"],
-        dosage_en=advisory_data["dosage_en"],
-        dosage_te=advisory_data["dosage_te"],
-        safety_notes_en=advisory_data["safety_notes_en"],
-        safety_notes_te=advisory_data["safety_notes_te"],
-        audio_url=audio_url
-    )
-    db.add(db_advisory)
-    db.commit()
+        advisory_record = Advisory(
+            scan_id=scan_id,
+            recommendation_en=advisory_data["actions_en"],
+            recommendation_te=advisory_data["actions_te"],
+            dosage_en=advisory_data["dosage_en"],
+            dosage_te=advisory_data["dosage_te"],
+            safety_notes_en=advisory_data["safety_notes_en"],
+            safety_notes_te=advisory_data["safety_notes_te"],
+            audio_url=audio_url
+        )
+        db.add(advisory_record)
+        db.commit()
+    except Exception as db_err:
+        print(f"[Scan DB Persistence Warning]: {db_err}")
+        db.rollback()
 
     return {
-        "id": scan_id,
-        "user_id": user_id,
-        "image_url": image_url,
-        "crop": prediction["crop"],
+        "scan_id": scan_id,
+        "crop": effective_crop,
         "crop_stage": crop_stage,
         "district": district,
         "mandal": mandal,
-        "diagnosis": prediction,
-        "advisory": {
-            "recommendation_en": advisory_data["recommendation_en"],
-            "recommendation_te": advisory_data["recommendation_te"],
-            "dosage_en": advisory_data["dosage_en"],
-            "dosage_te": advisory_data["dosage_te"],
-            "safety_notes_en": advisory_data["safety_notes_en"],
-            "safety_notes_te": advisory_data["safety_notes_te"],
-            "audio_url": audio_url
+        "diagnosis": {
+            "crop": effective_crop,
+            "disease_en": advisory_data["disease_en"],
+            "disease_te": advisory_data["disease_te"],
+            "confidence": confidence_val,
+            "risk_level": advisory_data["risk_level"],
+            "is_healthy": advisory_data["is_healthy"],
+            "is_low_confidence": is_low_conf
         },
+        "advisory": advisory_data,
         "weather": weather_info,
-        "created_at": db_scan.created_at.isoformat()
+        "audio_url": audio_url,
+        "created_at": datetime.datetime.utcnow().isoformat()
     }
 
-@router.get("")
-def list_scans(user_id: int = 1, db: Session = Depends(get_db)):
-    scans = db.query(CropScan).filter(CropScan.user_id == user_id).order_by(CropScan.created_at.desc()).all()
-    results = []
+@router.get("/history")
+def get_scan_history(user_id: int = 1, db: Session = Depends(get_db)):
+    scans = db.query(CropScan).filter(CropScan.user_id == user_id).order_by(CropScan.created_at.desc()).limit(20).all()
+    history_list = []
     for s in scans:
-        adv = db.query(Advisory).filter(Advisory.scan_id == s.id).first()
-        wth = db.query(WeatherSnapshot).filter(WeatherSnapshot.scan_id == s.id).first()
-        results.append({
+        history_list.append({
             "id": s.id,
-            "user_id": s.user_id,
-            "image_url": s.image_url,
             "crop": s.crop,
             "crop_stage": s.crop_stage,
-            "district": s.district,
-            "mandal": s.mandal,
-            "diagnosis": {
-                "crop": s.crop,
-                "disease": s.diagnosis,
-                "confidence": s.confidence,
-                "risk_level": s.risk_level
-            },
+            "diagnosis": s.diagnosis,
+            "confidence": s.confidence,
+            "risk_level": s.risk_level,
+            "image_url": s.image_url,
+            "created_at": s.created_at.isoformat() if s.created_at else None,
+            "weather": {
+                "temperature": s.weather.temperature if s.weather else "N/A",
+                "humidity": s.weather.humidity if s.weather else "N/A",
+                "condition": s.weather.condition if s.weather else "N/A"
+            } if s.weather else None,
             "advisory": {
-                "recommendation_en": adv.recommendation_en if adv else "",
-                "recommendation_te": adv.recommendation_te if adv else "",
-                "dosage_en": adv.dosage_en if adv else "",
-                "dosage_te": adv.dosage_te if adv else "",
-                "audio_url": adv.audio_url if adv else ""
-            },
-            "created_at": s.created_at.isoformat()
+                "recommendation_te": s.advisory.recommendation_te if s.advisory else "",
+                "recommendation_en": s.advisory.recommendation_en if s.advisory else "",
+                "dosage_te": s.advisory.dosage_te if s.advisory else "",
+                "dosage_en": s.advisory.dosage_en if s.advisory else "",
+                "audio_url": s.advisory.audio_url if s.advisory else ""
+            } if s.advisory else None
         })
-    return results
-
-@router.get("/{scan_id}")
-def get_scan_details(scan_id: str, db: Session = Depends(get_db)):
-    scan = db.query(CropScan).filter(CropScan.id == scan_id).first()
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan record not found")
-
-    adv = db.query(Advisory).filter(Advisory.scan_id == scan_id).first()
-    wth = db.query(WeatherSnapshot).filter(WeatherSnapshot.scan_id == scan_id).first()
-
-    return {
-        "id": scan.id,
-        "user_id": scan.user_id,
-        "image_url": scan.image_url,
-        "crop": scan.crop,
-        "crop_stage": scan.crop_stage,
-        "district": scan.district,
-        "mandal": scan.mandal,
-        "diagnosis": {
-            "crop": scan.crop,
-            "disease": scan.diagnosis,
-            "confidence": scan.confidence,
-            "risk_level": scan.risk_level
-        },
-        "advisory": {
-            "recommendation_en": adv.recommendation_en if adv else "",
-            "recommendation_te": adv.recommendation_te if adv else "",
-            "dosage_en": adv.dosage_en if adv else "",
-            "dosage_te": adv.dosage_te if adv else "",
-            "safety_notes_en": adv.safety_notes_en if adv else "",
-            "safety_notes_te": adv.safety_notes_te if adv else "",
-            "audio_url": adv.audio_url if adv else ""
-        },
-        "weather": {
-            "temperature": wth.temperature if wth else "30°C",
-            "humidity": wth.humidity if wth else "70%",
-            "rainfall_probability": wth.rainfall_probability if wth else "30%",
-            "condition": wth.condition if wth else "Partly Cloudy"
-        },
-        "created_at": scan.created_at.isoformat()
-    }
+    return {"history": history_list}

@@ -16,3 +16,9 @@ backend/audio_cache/
 .venv/
 env/
 venv/
+
+# Datasets and Scratch Tests
+dataset/
+dataset_raw/
+dataset_target_crops/
+scratch_test/

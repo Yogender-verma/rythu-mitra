@@ -1,116 +1,230 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 class AdvisoryEngine:
     """
     Contextual Advisory Rule & Knowledge Engine for RythuMitra AI.
     
-    Uses pre-verified agricultural recommendations from Telangana Agricultural University (PJTSAU)
-    guidelines based on crop, disease, crop stage, and weather snapshot.
+    Uses pre-verified agricultural recommendations from Professor Jayashankar Telangana State
+    Agricultural University (PJTSAU) guidelines based on crop, disease, crop stage, and live weather.
     """
 
     KNOWLEDGE_BASE = {
         "Cotton": {
-            "Cotton Leaf Curl Virus": {
-                "recommendation_en": "Remove infected plants immediately to stop spread. Spray Neem Oil (10,000 ppm) @ 2 ml/L of water to control whitefly vector.",
-                "recommendation_te": "తెగులు సోకిన మొక్కలను పీకి నాశనం చేయండి. తెల్ల ఈగ నివారణకు లీటరు నీటికి వేప నూనె 2 మి.లీ చొప్పున పిచికారీ చేయండి.",
-                "dosage_en": "Neem Oil 10,000 ppm: 2 ml per liter water. Acetamiprid 20% SP: 0.2g per liter water if whiteflies are severe.",
-                "dosage_te": "వేప నూనె 10,000 ppm: లీటరు నీటికి 2 మి.లీ. తీవ్రత ఎక్కువ ఉంటే ఎసిటామిప్రిడ్ 20% SP: లీటరు నీటికి 0.2 గ్రాములు.",
-                "safety_notes_en": "Wear protective mask while spraying. Spray in early morning or evening hours. Avoid spraying during heavy wind.",
-                "safety_notes_te": "పిచికారీ సమయంలో మాస్క్ ధరించండి. ఉదయం లేదా సాయంత్రం వేళల్లోనే పిచికారీ చేయండి."
+            "Cotton_Bacterial_Blight": {
+                "disease_en": "Bacterial Blight (Xanthomonas malvacearum)",
+                "disease_te": "ప్రత్తి బ్యాక్టీరియల్ ఆకు మచ్చ తెగులు",
+                "risk_level": "High",
+                "season_en": "Kharif / Monsoon Season (July - October)",
+                "season_te": "ఖరీఫ్ / వర్షాకాలం (జూలై - అక్టోబర్)",
+                "why_en": "High relative humidity (>75%), frequent rains, and warm temperatures (28-32°C) create ideal conditions for Xanthomonas bacteria to multiply and spread through water droplets.",
+                "why_te": "అధిక గాలి తేమ (75% పైన), వర్షపు నీటి తుంపరలు మరియు వేడి వాతావరణం (28-32°C) వల్ల ఈ బ్యాక్టీరియా వేగంగా వ్యాప్తి చెందుతుంది.",
+                "actions_en": "1. Remove and destroy severely infected leaves away from the field.\n2. Avoid sprinkler irrigation to prevent leaf wetness.\n3. Spray Copper Oxychloride @ 3g/L + Streptocycline @ 0.1g/L of water.\n4. Repeat after 10-12 days if wet weather continues.",
+                "actions_te": "1. తెగులు బాగా సోకిన ఆకులను ఏరివేసి కాల్చివేయండి.\n2. ఆకులపై ఎక్కువసేపు నీరు నిల్వ ఉండకుండా నీటి యాజమాన్యం చేపట్టండి.\n3. లీటరు నీటికి కాపర్ ఆక్సిక్లోరైడ్ 3 గ్రాములు + స్ట్రెప్టోసైక్లిన్ 0.1 గ్రాము కలిపి పిచికారీ చేయండి.\n4. వర్షాలు కొనసాగితే 10-12 రోజుల తర్వాత మళ్ళీ పిచికారీ చేయండి.",
+                "dosage_en": "Copper Oxychloride 50% WP: 3g/L water (600g/acre) + Streptocycline: 0.1g/L water (20g/acre).",
+                "dosage_te": "కాపర్ ఆక్సిక్లోరైడ్ 50% WP: లీటరు నీటికి 3 గ్రాములు (ఎకరాకు 600 గ్రా) + స్ట్రెప్టోసైక్లిన్: లీటరు నీటికి 0.1 గ్రాము (ఎకరాకు 20 గ్రా).",
+                "safety_notes_en": "Wear mask and gloves during spraying. Postpone spraying if rain is expected within 4 hours.",
+                "safety_notes_te": "మందుల పిచికారీ సమయంలో మాస్క్, గ్లౌజులు ధరించండి. వర్షం పడే సూచన ఉంటే పిచికారీ వాయిదా వేయండి."
             },
-            "Bacterial Leaf Blight": {
-                "recommendation_en": "Spray Copper Oxychloride 3g + Streptocycline 0.1g per liter of water. Avoid over-irrigation during rainy weather.",
-                "recommendation_te": "కాపర్ ఆక్సిక్లోరైడ్ 3 గ్రా + స్ట్రెప్టోసైక్లిన్ 0.1 గ్రా లీటరు నీటికి కలిపి పిచికారీ చేయండి. వర్షాల వేళ నీరు నిల్వ ఉండకుండా చూడండి.",
-                "dosage_en": "Copper Oxychloride: 3g/L water, Streptocycline: 100mg/L water.",
-                "dosage_te": "కాపర్ ఆక్సిక్లోరైడ్: లీటరు నీటికి 3 గ్రా, స్ట్రెప్టోసైక్లిన్: లీటరు నీటికి 100 మి.గ్రా.",
-                "safety_notes_en": "Ensure proper drainage in the field to prevent root suffocation.",
-                "safety_notes_te": "పొలంలో నీరు త్వరగా ఇంకిపోయేలా మురుగు కాలువలు ఏర్పాటు చేయండి."
+            "Cotton_Diseased_Plant": {
+                "disease_en": "Cotton Wilt / Root-Rot Complex",
+                "disease_te": "ప్రత్తి సిలీంధ్ర వేరు కుళ్ళు / వాడి తెగులు",
+                "risk_level": "High",
+                "season_en": "Kharif Season (August - November)",
+                "season_te": "ఖరీఫ్ కాలం (ఆగస్టు - నవంబర్)",
+                "why_en": "Poor soil drainage, excessive soil moisture, and fungal soil pathogens cause root vascular clogging, leading to yellowing and wilting.",
+                "why_te": "పొలంలో నీరు ఇంకిపోకపోవడం, తేమ ఎక్కువ కావడం వల్ల వేరు వ్యవస్థ దెబ్బతిని మొక్కలు వాడిపోతాయి.",
+                "actions_en": "1. Ensure clean surface drainage channels in the field.\n2. Drench plant base with Carbendazim @ 1g/L of water.\n3. Apply Trichoderma viride bio-fungicide mixed with neem cake near root zone.",
+                "actions_te": "1. పొలంలో నీరు నిల్వ ఉండకుండా మురుగు కాలువలు తీయండి.\n2. మొక్క మొదళ్ళలో కార్బెండజిమ్ 1 గ్రాము లీటరు నీటికి కలిపి కుదుళ్ళు తడిసేలా పోయండి.\n3. వేపపిండితో కలిపిన ట్రైకోడెర్మా విరిడే సిలీంధ్ర నాశినిని వేర్ల వద్ద అందించండి.",
+                "dosage_en": "Carbendazim 50% WP: 1g/L water drenching around plant basin.",
+                "dosage_te": "కార్బెండజిమ్ 50% WP: లీటరు నీటికి 1 గ్రాము చొప్పున కుదుళ్ళ వద్ద పోయండి.",
+                "safety_notes_en": "Do not mix chemical fungicides directly with bio-agents.",
+                "safety_notes_te": "జీవ సిలీంధ్ర నాశినులను రసాయనిక మందులతో నేరుగా కలపవద్దు."
             },
-            "Healthy Cotton Crop": {
-                "recommendation_en": "Your crop is healthy! Maintain regular weed control and balanced NPK fertilizer application according to crop stage.",
-                "recommendation_te": "మీ ప్రత్తి పైరు ఆరోగ్యంగా ఉంది! సమతుల్య ఎరువులను అందిస్తూ, కలుపు నివారణ చర్యలు చేపట్టండి.",
-                "dosage_en": "Apply Urea @ 25 kg/acre split dose during flowering stage.",
-                "dosage_te": "పూత దశలో ఎకరాకు 25 కేజీల యూరియాను అందించండి.",
-                "safety_notes_en": "Inspect leaves weekly for early signs of pests.",
-                "safety_notes_te": "వారానికి ఒకసారి ఆకుల వెనుక భాగాన్ని పరిశీలించండి."
+            "Cotton_Leaf_Curl": {
+                "disease_en": "Cotton Leaf Curl Virus (CLCuV)",
+                "disease_te": "ప్రత్తి ఆకు ముడుత వైరస్ తెగులు",
+                "risk_level": "High",
+                "season_en": "Early Kharif (July - September)",
+                "season_te": "ప్రారంభ ఖరీఫ్ (జూలై - సెప్టెంబర్)",
+                "why_en": "Transmitted primarily by the whitefly vector (Bemisia tabaci) during warm, humid spells with low rainfall.",
+                "why_te": "తెల్ల ఈగ పురుగు ద్వారా ఈ వైరస్ తెగులు ఒక మొక్క నుండి మరొక మొక్కకు వేగంగా వ్యాపిస్తుంది.",
+                "actions_en": "1. Install yellow sticky traps (10-15 per acre) to monitor and catch whiteflies.\n2. Remove heavily stunted infected plants.\n3. Spray Neem Oil 10,000 ppm @ 2 ml/L or Acetamiprid 20% SP @ 0.2g/L of water.",
+                "actions_te": "1. తెల్ల ఈగ నివారణకు ఎకరాకు 10-15 పసుపు రంగు జిగురు అట్టలను ఏర్పాటు చేయండి.\n2. వైరస్ సోకిన మొక్కలను పీకి నాశనం చేయండి.\n3. వేప నూనె 10,000 ppm లీటరు నీటికి 2 మి.లీ లేదా ఎసిటామిప్రిడ్ 20% SP 0.2 గ్రాములు పిచికారీ చేయండి.",
+                "dosage_en": "Neem Oil 10,000 ppm: 2 ml/L water or Acetamiprid 20% SP: 0.2g/L water (40g/acre).",
+                "dosage_te": "వేప నూనె 10,000 ppm: లీటరు నీటికి 2 మి.లీ లేదా ఎసిటామిప్రిడ్ 20% SP: లీటరు నీటికి 0.2 గ్రా (ఎకరాకు 40 గ్రా).",
+                "safety_notes_en": "Spray on lower leaf surfaces where whiteflies colonize.",
+                "safety_notes_te": "తెల్ల ఈగలు ఆకుల అడుగు భాగాన ఉంటాయి కాబట్టి అడుగు భాగం తడిసేలా పిచికారీ చేయండి."
+            },
+            "Cotton_Healthy": {
+                "disease_en": "Healthy Cotton Crop",
+                "disease_te": "ఆరోగ్యకరమైన ప్రత్తి పైరు",
+                "risk_level": "Low",
+                "season_en": "Current Season Growth Phase",
+                "season_te": "ప్రస్తుత పంట ఎదుగుదల కాలం",
+                "why_en": "Optimal nutrient management, balanced irrigation, and healthy foliage development.",
+                "why_te": "సమతుల్య ఎరువులు మరియు సరైన సంరక్షణ వల్ల పంట ఆరోగ్యంగా ఉంది.",
+                "actions_en": "1. Continue regular field scouting for sucking pests.\n2. Apply recommended split dose of Nitrogen and Potash fertilizers.\n3. Maintain clean field borders.",
+                "actions_te": "1. పొలాన్ని క్రమం తప్పకుండా పరిశీలిస్తూ రసం పీల్చే పురుగుల ఉనికిని గమనించండి.\n2. పంట దశను బట్టి నత్రజని, పొటాష్ ఎరువులను విడతలవారీగా అందించండి.\n3. పొలం గట్లను పరిశుభ్రంగా ఉంచండి.",
+                "dosage_en": "Apply Urea @ 25 kg/acre + MOP @ 15 kg/acre during flowering/boll formation stage.",
+                "dosage_te": "పూత మరియు కాయ దశలో ఎకరాకు 25 కేజీల యూరియా + 15 కేజీల పొటాష్ అందించండి.",
+                "safety_notes_en": "Inspect under-surface of top leaves weekly.",
+                "safety_notes_te": "వారానికి ఒకసారి లేత ఆకుల వెనుక భాగాన్ని గమనించండి."
             }
         },
         "Paddy": {
-            "Rice Blast (Pyricularia oryzae)": {
-                "recommendation_en": "Tricyclazole 75% WP @ 0.6g/L water. Reduce excess Nitrogenous fertilizer application.",
-                "recommendation_te": "ట్రైసైక్లజోల్ 75% డబ్ల్యూ.పి. లీటరు నీటికి 0.6 గ్రా చొప్పున పిచికారీ చేయండి. నత్రజని (యూరియా) ఎరువు వాడకం తగ్గించండి.",
-                "dosage_en": "Tricyclazole 75 WP: 120g per acre in 200 Liters of water.",
-                "dosage_te": "ట్రైసైక్లజోల్ 75 WP: ఎకరాకు 120 గ్రాములు 200 లీటర్ల నీటిలో కలిపి.",
-                "safety_notes_en": "Keep water level low in paddy fields during spray treatment.",
-                "safety_notes_te": "పిచికారీ సమయంలో మడిలో నీటి మట్టాన్ని తక్కువగా ఉంచండి."
+            "Paddy_Bacterial_Leaf_Blight": {
+                "disease_en": "Bacterial Leaf Blight (Xanthomonas oryzae)",
+                "disease_te": "వరి బ్యాక్టీరియల్ ఆకు ఎండు తెగులు",
+                "risk_level": "High",
+                "season_en": "Kharif & Late Rabi (August - October, January - March)",
+                "season_te": "ఖరీఫ్ మరియు చివరి రబీ (ఆగస్టు - అక్టోబర్)",
+                "why_en": "Excessive Nitrogen fertilizer application, high humidity (>80%), and strong winds with rain cause bacterial entry through leaf margins and wounds.",
+                "why_te": "అధిక నత్రజని (యూరియా) వాడకం, గాలిలో ఎక్కువ తేమ మరియు ఈదురు గాలులతో కూడిన వర్షాల వల్ల ఈ బ్యాక్టీరియా ఆకుల అంచుల గుండా ప్రవేశిస్తుంది.",
+                "actions_en": "1. Temporarily drain out standing water from paddy fields.\n2. Reduce Nitrogen (Urea) application until symptoms recede.\n3. Spray Plantomycin @ 0.2g/L + Copper Oxychloride @ 2.5g/L of water.",
+                "actions_te": "1. పొలంలో నీటిని తాత్కాలికంగా తీసివేసి ఆరబెట్టండి.\n2. తెగులు తగ్గేవరకు నత్రజని (యూరియా) వేయడం ఆపివేయండి.\n3. ప్లాంటోమైసిన్ 0.2 గ్రాములు + కాపర్ ఆక్సిక్లోరైడ్ 2.5 గ్రాములు లీటరు నీటికి కలిపి పిచికారీ చేయండి.",
+                "dosage_en": "Plantomycin: 40g/acre + Copper Oxychloride: 500g/acre in 200 Liters of water.",
+                "dosage_te": "ప్లాంటోమైసిన్: ఎకరాకు 40 గ్రాములు + కాపర్ ఆక్సిక్లోరైడ్: ఎకరాకు 500 గ్రాములు 200 లీటర్ల నీటిలో.",
+                "safety_notes_en": "Avoid spraying during peak noon temperature.",
+                "safety_notes_te": "మధ్యాహ్నం బాగా ఎండగా ఉన్న సమయంలో పిచికారీ చేయవద్దు."
             },
-            "Sheath Blight": {
-                "recommendation_en": "Spray Hexaconazole 5% EC @ 2 ml/L water directed towards lower leaf sheaths.",
-                "recommendation_te": "హెక్సాకొనజోల్ 5% ఈసీ లీటరు నీటికి 2 మి.లీ చొప్పున మొక్క మొదళ్ళ పై పడేలా పిచికారీ చేయండి.",
-                "dosage_en": "Hexaconazole 5% EC: 400 ml per acre in 200L water.",
-                "dosage_te": "హెక్సాకొనజోల్ 5% ఈసీ: ఎకరాకు 400 మి.లీ 200 లీటర్ల నీటిలో.",
-                "safety_notes_en": "Avoid dense cropping spacing to enable sunlight airflow.",
-                "safety_notes_te": "మొక్కల మధ్య సరైన గాలి, వెలుతురు ప్రసరించేలా చూడండి."
+            "Paddy_Brown_Spot": {
+                "disease_en": "Brown Spot (Bipolaris oryzae / Helminthosporium)",
+                "disease_te": "వరి గోధుమ రంగు మచ్చ తెగులు",
+                "risk_level": "Medium",
+                "season_en": "Kharif & Rabi (September - November)",
+                "season_te": "ఖరీఫ్ మరియు రబీ కాలం (సెప్టెంబర్ - నవంబర్)",
+                "why_en": "Nutritional deficiency (especially Potassium and Iron) in light soils combined with dew wetness and cloudy weather.",
+                "why_te": "నేలలో పొటాష్ మరియు సూక్ష్మపోషకాల లోపం, ఆకులపై మంచు తేమ నిలిచి ఉండటం వల్ల ఈ సిలీంధ్ర మచ్చలు ఏర్పడతాయి.",
+                "actions_en": "1. Apply balanced Potash fertilizer (MOP) to correct nutrient stress.\n2. Spray Mancozeb 75% WP @ 2g/L or Propiconazole 25% EC @ 1 ml/L of water.\n3. Ensure adequate field water management.",
+                "actions_te": "1. నేలలో పొటాష్ లోపాన్ని సవరించడానికి ఎకరాకు పొటాష్ ఎరువును అందించండి.\n2. మ్యాంకోజెబ్ 75% WP 2 గ్రాములు లేదా ప్రొపికోనజోల్ 25% EC 1 మి.లీ లీటరు నీటికి కలిపి పిచికారీ చేయండి.\n3. పొలానికి క్రమం తప్పకుండా నీటి తడులు అందించండి.",
+                "dosage_en": "Mancozeb 75% WP: 400g/acre or Propiconazole 25% EC: 200 ml/acre in 200L water.",
+                "dosage_te": "మ్యాంకోజెబ్ 75% WP: ఎకరాకు 400 గ్రాములు లేదా ప్రొపికోనజోల్ 25% EC: ఎకరాకు 200 మి.లీ 200 లీటర్ల నీటిలో.",
+                "safety_notes_en": "Ensure complete coverage of leaf canopy.",
+                "safety_notes_te": "ఆకులన్నీ బాగా తడిసేలా పిచికారీ చేయండి."
             },
-            "Healthy Paddy Crop": {
-                "recommendation_en": "Paddy is in vibrant health! Maintain 2-5 cm water depth during tillering and flowering stage.",
-                "recommendation_te": "మీ వరి పైరు చాలా ఆరోగ్యంగా ఉంది! పిలకలు తొడిగే దశలో 2-5 సెం.మీ నీటి మట్టం నిర్వహించండి.",
-                "dosage_en": "Potash application @ 15 kg/acre during panicle initiation.",
-                "dosage_te": "చిరుపొట్ట దశలో ఎకరాకు 15 కేజీల పొటాష్ ఎరువు వేయండి.",
-                "safety_notes_en": "Monitor for stem borer egg masses.",
-                "safety_notes_te": "తొలుచు పురుగు గుడ్ల సముదాయాలను గమనించి ఏరివేయండి."
+            "Paddy_Leaf_Smut": {
+                "disease_en": "Leaf Smut (Entyloma oryzae)",
+                "disease_te": "వరి ఆకు కాటుక తెగులు",
+                "risk_level": "Medium",
+                "season_en": "Late Kharif (October - November)",
+                "season_te": "చలికాలం ప్రారంభం (అక్టోబర్ - నవంబర్)",
+                "why_en": "Favored by high humidity, cool night temperatures, and excess vegetative growth in late crop stages.",
+                "why_te": "రాత్రి వేళల్లో తక్కువ ఉష్ణోగ్రతలు, గాలిలో ఎక్కువ తేమ వల్ల ఆకులపై నల్లటి చారలతో కూడిన కాటుక మచ్చలు వస్తాయి.",
+                "actions_en": "1. Avoid excessive late nitrogen top-dressing.\n2. Spray Copper Hydroxide @ 2g/L or Hexaconazole @ 2 ml/L of water.\n3. Maintain clean bunds.",
+                "actions_te": "1. ఆలస్యంగా నత్రజని ఎరువులు వేయడం తగ్గించండి.\n2. కాపర్ హైడ్రాక్సైడ్ 2 గ్రాములు లేదా హెక్సాకొనజోల్ 2 మి.లీ లీటరు నీటికి కలిపి పిచికారీ చేయండి.\n3. పొలం గట్లపై కలుపు లేకుండా పరిశుభ్రంగా ఉంచండి.",
+                "dosage_en": "Hexaconazole 5% EC: 2 ml per liter of water (400 ml/acre).",
+                "dosage_te": "హెక్సాకొనజోల్ 5% EC: లీటరు నీటికి 2 మి.లీ (ఎకరాకు 400 మి.లీ).",
+                "safety_notes_en": "Use clean water for preparing chemical spray mixture.",
+                "safety_notes_te": "పిచికారీకి పరిశుభ్రమైన నీటిని మాత్రమే వాడండి."
+            },
+            "Paddy_Healthy": {
+                "disease_en": "Healthy Paddy Crop",
+                "disease_te": "ఆరోగ్యకరమైన వరి పైరు",
+                "risk_level": "Low",
+                "season_en": "Current Season Growth Phase",
+                "season_te": "ప్రస్తుత పంట ఎదుగుదల కాలం",
+                "why_en": "Proper water depth, optimal tillering, and healthy green leaf sheath development.",
+                "why_te": "తగినంత నీటి మట్టం మరియు పోషకాల యాజమాన్యం వల్ల పైరు పచ్చగా ఆరోగ్యంగా ఉంది.",
+                "actions_en": "1. Maintain 2-5 cm shallow water depth during tillering and panicle initiation.\n2. Monitor for stem borer and BPH pest activity.\n3. Apply Potash @ 15 kg/acre at booting stage.",
+                "actions_te": "1. పిలకలు తొడిగే మరియు చిరుపొట్ట దశలో 2-5 సెం.మీ నీటి మట్టం నిర్వహించండి.\n2. కాండం తొలిచే పురుగు మరియు సుడి దోమ ఉనికిని గమనించండి.\n3. చిరుపొట్ట దశలో ఎకరాకు 15 కేజీల పొటాష్ ఎరువు వేయండి.",
+                "dosage_en": "Apply MOP (Muriate of Potash) @ 15 kg/acre at booting stage.",
+                "dosage_te": "చిరుపొట్ట దశలో ఎకరాకు 15 కేజీల పొటాష్ అందించండి.",
+                "safety_notes_en": "Alternate wetting and drying practice saves water and promotes root health.",
+                "safety_notes_te": "మడిని ఆరబెడుతూ తడులు ఇవ్వడం వల్ల వేర్లు దృఢంగా పెరుగుతాయి."
             }
         },
         "Chilli": {
-            "Chilli Leaf Curl Virus (Thrips / Mites)": {
-                "recommendation_en": "Spray Fipronil 5% SC @ 2 ml/L or Diafenthiuron 50% WP @ 1g/L of water. Install blue/yellow sticky traps.",
-                "recommendation_te": "ఫిప్రోనిల్ 5% SC లీటరు నీటికి 2 మి.లీ లేదా డయాఫెంథియురాన్ 50% WP 1 గ్రా నీటిలో కలిపి పిచికారీ చేయండి. పసుపు, నీలి రంగు జిగురు కార్డులు ఏర్పాటు చేయండి.",
-                "dosage_en": "Fipronil 5% SC: 400 ml/acre or Diafenthiuron: 250g/acre.",
-                "dosage_te": "ఫిప్రోనిల్ 5% SC: ఎకరాకు 400 మి.లీ లేదా డయాఫెంథియురాన్: ఎకరాకు 250 గ్రా.",
-                "safety_notes_en": "Do not mix multiple systemic insecticides simultaneously.",
-                "safety_notes_te": "ఒకేసారి ఎక్కువ రకాల మందులను కలపవద్దు."
+            "Chilli_Bacterial_Spot": {
+                "disease_en": "Bacterial Leaf Spot (Xanthomonas vesicatoria)",
+                "disease_te": "మిర్చి బ్యాక్టీరియల్ ఆకు మచ్చ తెగులు",
+                "risk_level": "High",
+                "season_en": "Kharif & Post-Monsoon (August - December)",
+                "season_te": "ఖరీఫ్ మరియు వర్షాకాలం తర్వాత (ఆగస్టు - డిసెంబర్)",
+                "why_en": "High humidity (>80%), rain splashes, and warm days spread bacterial spores causing dark water-soaked spots on leaves and pods.",
+                "why_te": "వర్షపు నీటి తుంపరలు, గాలిలో తేమ ఎక్కువగా ఉండటం వల్ల ఈ మచ్చల తెగులు ఆకులు మరియు కాయలకు వేగంగా సోకుతుంది.",
+                "actions_en": "1. Remove affected leaves and fallen spotted fruits.\n2. Avoid furrow flood irrigation that spreads bacteria.\n3. Spray Copper Oxychloride @ 3g/L + Streptocycline @ 0.1g/L of water.\n4. Repeat spray after 10 days.",
+                "actions_te": "1. తెగులు సోకిన ఆకులను, రాలిన కాయలను ఏరివేసి నాశనం చేయండి.\n2. పొలంలో నీరు పారించేటప్పుడు చైన్ నీటి పారుదల వద్దండి.\n3. కాపర్ ఆక్సిక్లోరైడ్ 3 గ్రాములు + స్ట్రెప్టోసైక్లిన్ 0.1 గ్రాము లీటరు నీటికి కలిపి పిచికారీ చేయండి.\n4. 10 రోజుల తర్వాత మళ్ళీ పిచికారీ చేయండి.",
+                "dosage_en": "Copper Oxychloride 50% WP: 3g/L (600g/acre) + Streptocycline: 0.1g/L (20g/acre).",
+                "dosage_te": "కాపర్ ఆక్సిక్లోరైడ్ 50% WP: లీటరు నీటికి 3 గ్రా (ఎకరాకు 600 గ్రా) + స్ట్రెప్టోసైక్లిన్: లీటరు నీటికి 0.1 గ్రా (ఎకరాకు 20 గ్రా).",
+                "safety_notes_en": "Avoid spraying during strong winds.",
+                "safety_notes_te": "గాలి తీవ్రత ఎక్కువగా ఉన్నప్పుడు పిచికారీ చేయవద్దు."
             },
-            "Anthracnose / Fruit Rot": {
-                "recommendation_en": "Spray Azoxystrobin 23% SC @ 1 ml/L or Mancozeb 75% WP @ 2.5g/L of water.",
-                "recommendation_te": "అజాక్సీస్ట్రోబిన్ 23% SC లీటరు నీటికి 1 మి.లీ లేదా మ్యాంకోజెబ్ 75% WP 2.5 గ్రా నీటిలో కలిపి పిచికారీ చేయండి.",
-                "dosage_en": "Azoxystrobin: 200 ml/acre in 200L water.",
-                "dosage_te": "అజాక్సీస్ట్రోబిన్: ఎకరాకు 200 మి.లీ 200 లీటర్ల నీటిలో.",
-                "safety_notes_en": "Pick affected rotting fruits and destroy them away from field.",
-                "safety_notes_te": "కుళ్ళిన కాయలను ఏరివేసి పొలానికి దూరంగా తగలేయండి."
-            },
-            "Healthy Chilli Crop": {
-                "recommendation_en": "Chilli plants are thriving. Ensure soil moisture balance and micronutrient spray (Formula 4) @ 5g/L.",
-                "recommendation_te": "మిర్చి పైరు ఆరోగ్యంగా ఉంది. నేల తేమను కాపాడుతూ సూక్ష్మపోషకాల పిచికారీ చేయండి.",
-                "dosage_en": "Micronutrient mixture: 5g per liter water.",
-                "dosage_te": "సూక్ష్మపోషకాల మిశ్రమం: లీటరు నీటికి 5 గ్రాములు.",
-                "safety_notes_en": "Prevent waterlogging near roots.",
-                "safety_notes_te": "వేర్ల వద్ద నీరు నిల్వ ఉండకుండా జాగ్రత్తపడండి."
+            "Chilli_Healthy": {
+                "disease_en": "Healthy Chilli Crop",
+                "disease_te": "ఆరోగ్యకరమైన మిర్చి పైరు",
+                "risk_level": "Low",
+                "season_en": "Current Season Growth Phase",
+                "season_te": "ప్రస్తుత పంట ఎదుగుదల కాలం",
+                "why_en": "Good soil aeration, balanced micronutrients, and effective thrips/mite management.",
+                "why_te": "తగినంత తేమ, సూక్ష్మపోషకాల లభ్యత వల్ల మిర్చి తోట ఆరోగ్యంగా ఎదుగుతోంది.",
+                "actions_en": "1. Install blue and yellow sticky traps (10 per acre) for thrips and whiteflies.\n2. Apply Micronutrient Mixture @ 5g/L during flowering.\n3. Ensure adequate drip irrigation.",
+                "actions_te": "1. తామర పురుగులు, తెల్ల ఈగ కోసం ఎకరాకు 10 పసుపు, నీలి రంగు జిగురు అట్టలను ఏర్పాటు చేయండి.\n2. పూత దశలో సూక్ష్మపోషకాల మిశ్రమాన్ని లీటరు నీటికి 5 గ్రాముల చొప్పున పిచికారీ చేయండి.\n3. బిందు సేద్యం ద్వారా క్రమబద్ధంగా నీరు అందించండి.",
+                "dosage_en": "Micronutrient Formula 4: 5g per liter of water during flowering and fruiting stage.",
+                "dosage_te": "సూక్ష్మపోషకాల మిశ్రమం: పూత, కాయ దశలో లీటరు నీటికి 5 గ్రాములు.",
+                "safety_notes_en": "Keep soil moist but not waterlogged.",
+                "safety_notes_te": "నేలలో తేమ ఉండేలా చూడండి, వేర్ల వద్ద నీరు నిల్వ ఉండనివ్వకండి."
             }
         },
         "Maize": {
-            "Turcicum Leaf Blight": {
-                "recommendation_en": "Spray Mancozeb 75% WP @ 2.5g/L water at first appearance of long elliptical spots on lower leaves.",
-                "recommendation_te": "ఆకులపై ఎండిన మచ్చలు కనిపించగానే మ్యాంకోజెబ్ 75% WP లీటరు నీటికి 2.5 గ్రా చొప్పున పిచికారీ చేయండి.",
-                "dosage_en": "Mancozeb 75% WP: 500g per acre in 200L water.",
-                "dosage_te": "మ్యాంకోజెబ్ 75% WP: ఎకరాకు 500 గ్రాములు 200 లీటర్ల నీటిలో.",
-                "safety_notes_en": "Repeat spray after 10-12 days if wet weather continues.",
-                "safety_notes_te": "వర్షాలు కొనసాగితే 10-12 రోజుల తర్వాత మళ్ళీ పిచికారీ చేయండి."
+            "Maize_Common_Rust": {
+                "disease_en": "Common Rust (Puccinia sorghi)",
+                "disease_te": "మొక్కజొన్న సాధారణ తుప్పు తెగులు",
+                "risk_level": "High",
+                "season_en": "Rabi & Winter Season (November - February)",
+                "season_te": "రబీ మరియు చలికాలం (నవంబర్ - ఫిబ్రవరి)",
+                "why_en": "Cool temperatures (16-23°C), high humidity, and prolonged leaf dew enable rust fungal urediniospores to germinate on both leaf surfaces.",
+                "why_te": "చలి వాతావరణం (16-23°C), గాలిలో తేమ మరియు రాత్రి పూట ఎక్కువ మంచు కురవడం వల్ల ఆకులపై ఇటుక ఎరుపు రంగు తుప్పు మచ్చలు ఏర్పడతాయి.",
+                "actions_en": "1. Destroy infected crop residue after harvest.\n2. Spray Mancozeb 75% WP @ 2.5g/L or Propiconazole 25% EC @ 1 ml/L of water at first sign of rust pustules.\n3. Repeat after 12-14 days if cool damp weather continues.",
+                "actions_te": "1. ఆకులపై ఇటుక ఎరుపు రంగు మచ్చలు కనిపించగానే పిచికారీ ప్రారంభించండి.\n2. మ్యాంకోజెబ్ 75% WP 2.5 గ్రాములు లేదా ప్రొపికోనజోల్ 25% EC 1 మి.లీ లీటరు నీటికి కలిపి పిచికారీ చేయండి.\n3. చలి, మంచు ఎక్కువ ఉంటే 12-14 రోజుల తర్వాత మళ్ళీ పిచికారీ చేయండి.",
+                "dosage_en": "Mancozeb 75% WP: 500g/acre or Propiconazole 25% EC: 200 ml/acre in 200L water.",
+                "dosage_te": "మ్యాంకోజెబ్ 75% WP: ఎకరాకు 500 గ్రాములు లేదా ప్రొపికోనజోల్ 25% EC: ఎకరాకు 200 మి.లీ 200 లీటర్ల నీటిలో.",
+                "safety_notes_en": "Target spray on both upper and lower leaf surfaces.",
+                "safety_notes_te": "ఆకు పై మరియు క్రింది భాగం తడిసేలా పిచికారీ చేయండి."
             },
-            "Fall Armyworm Damage": {
-                "recommendation_en": "Apply Emamectin Benzoate 5% SG @ 0.4g/L of water into crop whorls.",
-                "recommendation_te": "ఎమామెక్టిన్ బెంజోయేట్ 5% SG లీటరు నీటికి 0.4 గ్రా చొప్పున సుడిలో పడేలా పిచికారీ చేయండి.",
-                "dosage_en": "Emamectin Benzoate 5% SG: 80g per acre.",
-                "dosage_te": "ఎమామెక్టిన్ బెంజోయేట్ 5% SG: ఎకరాకు 80 గ్రాములు.",
-                "safety_notes_en": "Target nozzle directly into the central whorl of maize plants.",
-                "safety_notes_te": "పిచికారీ నాజిల్ నేరుగా మొక్క సుడిలోకి ఉండేలా చూడండి."
+            "Maize_Gray_Leaf_Spot": {
+                "disease_en": "Gray Leaf Spot (Cercospora zeae-maydis)",
+                "disease_te": "మొక్కజొన్న బూడిద మచ్చ తెగులు",
+                "risk_level": "Medium",
+                "season_en": "Kharif & Late Kharif (August - October)",
+                "season_te": "ఖరీఫ్ కాలం (ఆగస్టు - అక్టోబర్)",
+                "why_en": "Warm, humid conditions with overcast foggy mornings encourage rectangular gray-brown fungal lesions along leaf veins.",
+                "why_te": "వేడి వాతావరణం, మబ్బుగా ఉండటం వల్ల ఆకు ఈనెల మధ్య పొడవాటి బూడిద రంగు మచ్చలు ఏర్పడి ఆకులు త్వరగా ఎండిపోతాయి.",
+                "actions_en": "1. Practice crop rotation with non-graminaceous crops.\n2. Spray Carbendazim 12% + Mancozeb 63% WP @ 2g/L of water.\n3. Avoid overcrowded plant spacing.",
+                "actions_te": "1. పంట మార్పిడి పద్ధతులను పాటించండి.\n2. కార్బెండజిమ్ 12% + మ్యాంకోజెబ్ 63% WP లీటరు నీటికి 2 గ్రాముల చొప్పున పిచికారీ చేయండి.\n3. మొక్కల మధ్య గాలి వెలుతురు ప్రసరించేలా చూడండి.",
+                "dosage_en": "Carbendazim + Mancozeb (Saaf): 400g per acre in 200L water.",
+                "dosage_te": "సాఫ్ (కార్బెండజిమ్ + మ్యాంకోజెబ్): ఎకరాకు 400 గ్రాములు 200 లీటర్ల నీటిలో.",
+                "safety_notes_en": "Do not harvest green cobs within 14 days of spraying.",
+                "safety_notes_te": "పిచికారీ చేసిన 14 రోజుల వరకు పచ్చికంకులను కోయవద్దు."
             },
-            "Healthy Maize Crop": {
-                "recommendation_en": "Maize crop is healthy and growing strongly. Apply top dressing Nitrogen during kneehigh stage.",
-                "recommendation_te": "మొక్కజొన్న పంట ఆరోగ్యంగా ఎదుగుతోంది. మోకాలు ఎత్తు దశలో నత్రజని ఎరువులు వేయండి.",
-                "dosage_en": "Urea @ 35 kg/acre during vegetative stage.",
-                "dosage_te": "ఎకరాకు 35 కేజీల యూరియా అందించండి.",
-                "safety_notes_en": "Ensure sufficient moisture during cob formation stage.",
-                "safety_notes_te": "కంకి తొడిగే దశలో తగినంత తేమ ఉండేలా చూడండి."
+            "Maize_Northern_Leaf_Blight": {
+                "disease_en": "Northern Leaf Blight (Exserohilum turcicum)",
+                "disease_te": "మొక్కజొన్న ఉత్తర ఆకు ఎండు తెగులు",
+                "risk_level": "High",
+                "season_en": "Kharif & Rabi (August - December)",
+                "season_te": "ఖరీఫ్ మరియు రబీ (ఆగస్టు - డిసెంబర్)",
+                "why_en": "Moderate temperatures (18-27°C) with high relative humidity and heavy dew formation lead to large cigar-shaped grayish lesions.",
+                "why_te": "మితమైన ఉష్ణోగ్రత, రాత్రి మంచు ఎక్కువ కావడం వల్ల ఆకులపై పొడవాటి నావ ఆకారపు ఎండు మచ్చలు ఏర్పడతాయి.",
+                "actions_en": "1. Collect and burn heavily affected lower leaves.\n2. Spray Mancozeb 75% WP @ 2.5g/L or Azoxystrobin 23% SC @ 1 ml/L of water.\n3. Apply balanced potassium to strengthen leaf tissue.",
+                "actions_te": "1. కింద భాగంలో తెగులు సోకిన ఆకులను తీసివేసి నాశనం చేయండి.\n2. మ్యాంకోజెబ్ 75% WP 2.5 గ్రాములు లేదా అజాక్సీస్ట్రోబిన్ 23% SC 1 మి.లీ లీటరు నీటికి కలిపి పిచికారీ చేయండి.\n3. పైరు దృఢత్వానికి పొటాష్ ఎరువును అందించండి.",
+                "dosage_en": "Azoxystrobin 23% SC: 200 ml/acre in 200L water or Mancozeb: 500g/acre.",
+                "dosage_te": "అజాక్సీస్ట్రోబిన్ 23% SC: ఎకరాకు 200 మి.లీ లేదా మ్యాంకోజెబ్: ఎకరాకు 500 గ్రాములు 200 లీటర్ల నీటిలో.",
+                "safety_notes_en": "Spray early at first symptom detection.",
+                "safety_notes_te": "తెగులు మచ్చలు కనిపించిన వెంటనే తొలి దశలోనే పిచికారీ చేయండి."
+            },
+            "Maize_Healthy": {
+                "disease_en": "Healthy Maize Crop",
+                "disease_te": "ఆరోగ్యకరమైన మొక్కజొన్న పైరు",
+                "risk_level": "Low",
+                "season_en": "Current Season Growth Phase",
+                "season_te": "ప్రస్తుత పంట ఎదుగుదల కాలం",
+                "why_en": "Sturdy stalk development, optimal leaf nitrogen index, and clear cob formation.",
+                "why_te": "మొక్క బలంగా ఎదుగుతోంది, ఆకులు పచ్చగా ఆరోగ్యంగా ఉన్నాయి.",
+                "actions_en": "1. Apply top-dressing Nitrogen fertilizer during kneehigh and taselling stage.\n2. Monitor central leaf whorl for Fall Armyworm eggs.\n3. Ensure adequate moisture during cob filling.",
+                "actions_te": "1. మోకాలు ఎత్తు మరియు పిలక దశలో ఎకరాకు నత్రజని ఎరువును వేయండి.\n2. కత్తెర పురుగు ఉనికి కోసం మొక్క సుడి భాగాన్ని పరిశీలించండి.\n3. కంకి తొడిగే దశలో నేలలో తగినంత తేమ ఉండేలా చూడండి.",
+                "dosage_en": "Urea: 35 kg/acre during knee-high stage + MOP: 15 kg/acre during flowering.",
+                "dosage_te": "మోకాలు ఎత్తు దశలో ఎకరాకు 35 కేజీల యూరియా + 15 కేజీల పొటాష్ అందించండి.",
+                "safety_notes_en": "Maintain clean field margins.",
+                "safety_notes_te": "పొలం గట్లపై కలుపు లేకుండా చూడండి."
             }
         }
     }
@@ -119,43 +233,94 @@ class AdvisoryEngine:
     def get_advisory(
         cls,
         crop: str,
-        disease: str,
-        crop_stage: str,
-        weather_condition: str,
-        risk_level: str
-    ) -> Dict[str, str]:
-        crop_key = crop.capitalize() if crop else "Cotton"
-        crop_data = cls.KNOWLEDGE_BASE.get(crop_key, cls.KNOWLEDGE_BASE["Cotton"])
+        disease_key: str,
+        weather_info: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        crop_name = crop.capitalize() if crop else "Cotton"
+        crop_kb = cls.KNOWLEDGE_BASE.get(crop_name, cls.KNOWLEDGE_BASE["Cotton"])
         
-        # Match disease or fallback to healthy
-        advice = crop_data.get(disease, None)
-        if not advice:
-            # Fallback matching
-            for k, v in crop_data.items():
-                if disease.lower() in k.lower() or k.lower() in disease.lower():
-                    advice = v
+        # Match disease key or fallback
+        info = crop_kb.get(disease_key)
+        if not info:
+            for k, v in crop_kb.items():
+                if disease_key.lower() in k.lower() or k.lower() in disease_key.lower():
+                    info = v
                     break
-        if not advice:
-            advice = crop_data.get(
-                "Healthy " + crop_key + " Crop",
-                list(crop_data.values())[0]
-            )
+        if not info:
+            info = crop_kb.get(f"{crop_name}_Healthy", list(crop_kb.values())[0])
 
-        # Weather contextual note addition
-        weather_note_en = ""
-        weather_note_te = ""
-        if "rain" in weather_condition.lower() or "cloud" in weather_condition.lower():
-            weather_note_en = f" 🌦️ Weather Warning ({weather_condition}): Rain is expected soon in your area. Postpone liquid sprays until rain stops to avoid chemical wash-off."
-            weather_note_te = f" 🌦️ వాతావరణ సమాచారం ({weather_condition}): మీ ప్రాంతంలో వర్షం కురిసే అవకాశం ఉంది. మందుల పిచికారీని వర్షం తగ్గాకే చేపట్టండి."
-        elif "hot" in weather_condition.lower() or "sunny" in weather_condition.lower():
-            weather_note_en = f" ☀️ Weather Note: High temperature ({weather_condition}). Ensure light irrigation in evening hours to prevent moisture stress during {crop_stage} stage."
-            weather_note_te = f" ☀️ వాతావరణ గమనిక: ఎండ తీవ్రత ఎక్కువగా ఉంది ({weather_condition}). {crop_stage} దశలో మొక్క నీటి ఎద్దడికి గురికాకుండా సాయంత్రం తడి అందించండి."
+        is_healthy = "healthy" in disease_key.lower() or "healthy" in info.get("disease_en", "").lower()
+        
+        # Weather & Season Context
+        w_avail = weather_info.get("is_weather_available", False) if weather_info else False
+        w_temp = weather_info.get("temperature", "N/A") if weather_info else "N/A"
+        w_hum = weather_info.get("humidity", "N/A") if weather_info else "N/A"
+        w_cond_en = weather_info.get("condition", "Clear") if weather_info else "Clear"
+        w_cond_te = weather_info.get("condition_telugu", "సాధారణ వాతావరణం") if weather_info else "సాధారణ వాతావరణం"
+
+        weather_summary_en = f"📍 {weather_info.get('location_name', 'Telangana')} | 🌡️ {w_temp} | 💧 Humidity: {w_hum} ({w_cond_en})" if w_avail else "Live weather unavailable"
+        weather_summary_te = f"📍 {weather_info.get('location_name', 'తెలంగాణ')} | 🌡️ {w_temp} | 💧 తేమ: {w_hum} ({w_cond_te})" if w_avail else "లైవ్ వాతావరణ సమాచారం అందుబాటులో లేదు"
+
+        # Why Explanation
+        why_en = info["why_en"]
+        why_te = info["why_te"]
+        if w_avail:
+            why_en += f" Current live weather ({w_temp}, {w_hum} humidity, {w_cond_en}) directly influences this disease trajectory."
+            why_te += f" ప్రస్తుతం ఉన్న వాతావరణం ({w_temp}, తేమ {w_hum}, {w_cond_te}) తెగులు తీవ్రత పై ప్రభావం చూపుతాయి."
+
+        # Actions & Treatments
+        actions_en = info["actions_en"]
+        actions_te = info["actions_te"]
+
+        # Voice Audio Script (CONTAINS ONLY: A. Why it happened + B. What to do)
+        if is_healthy:
+            audio_text_te = f"మీ {info['disease_te']}. {why_te} ఇప్పుడు ఏమి చేయాలి: {actions_te}"
+            audio_text_en = f"Your {info['disease_en']}. {why_en} What to do: {actions_en}"
+        else:
+            audio_text_te = f"ఈ తెగులు రావడానికి కారణం: {why_te} ఇప్పుడు ఏమి చేయాలి: {actions_te}"
+            audio_text_en = f"Why this happened: {why_en} What you should do: {actions_en}"
 
         return {
-            "recommendation_en": advice["recommendation_en"] + weather_note_en,
-            "recommendation_te": advice["recommendation_te"] + weather_note_te,
-            "dosage_en": advice["dosage_en"],
-            "dosage_te": advice["dosage_te"],
-            "safety_notes_en": advice["safety_notes_en"],
-            "safety_notes_te": advice["safety_notes_te"]
+            "is_healthy": is_healthy,
+            "disease_en": info["disease_en"],
+            "disease_te": info["disease_te"],
+            "risk_level": info["risk_level"],
+            "season_en": info["season_en"],
+            "season_te": info["season_te"],
+            "why_en": why_en,
+            "why_te": why_te,
+            "actions_en": actions_en,
+            "actions_te": actions_te,
+            "dosage_en": info["dosage_en"],
+            "dosage_te": info["dosage_te"],
+            "safety_notes_en": info["safety_notes_en"],
+            "safety_notes_te": info["safety_notes_te"],
+            "weather_summary_en": weather_summary_en,
+            "weather_summary_te": weather_summary_te,
+            "audio_text_te": audio_text_te,
+            "audio_text_en": audio_text_en
+        }
+
+    @classmethod
+    def get_low_confidence_advisory(cls, crop: str) -> Dict[str, Any]:
+        return {
+            "is_healthy": False,
+            "is_low_confidence": True,
+            "disease_en": "Unable to confidently identify the problem. Please capture a clearer image of the affected leaf.",
+            "disease_te": "ఈ చిత్రాన్ని బట్టి వ్యాధిని ఖచ్చితంగా గుర్తించలేకపోయాము. దయచేసి ప్రభావిత ఆకును దగ్గరగా, స్పష్టమైన వెలుతురులో ఫోటో తీయండి.",
+            "risk_level": "Unknown",
+            "season_en": "N/A",
+            "season_te": "వర్తించదు",
+            "why_en": "The uploaded photo is blurry, improperly lit, or outside the trained disease classification boundaries.",
+            "why_te": "అప్‌లోడ్ చేసిన ఫోటో స్పష్టంగా లేదు లేదా సరిపడా వెలుతురు లేదు. అందువల్ల ఖచ్చితమైన విశ్లేషణ సాధ్యపడలేదు.",
+            "actions_en": "1. Move closer to the affected leaf.\n2. Ensure good natural sunlight daylighting.\n3. Keep your mobile camera steady and retake the photograph.",
+            "actions_te": "1. వ్యాధి సోకిన ఆకుకు దగ్గరగా రండి.\n2. మంచి వెలుతురు ఉండేలా చూసుకోండి.\n3. ఫోటో స్పష్టంగా వచ్చేలా మళ్ళీ స్కాన్ చేయండి.",
+            "dosage_en": "No chemical dosage recommended for low confidence scans.",
+            "dosage_te": "ఖచ్చితమైన గుర్తింపు లేనిదే ఎలాంటి మందులు వాడవద్దు.",
+            "safety_notes_en": "Consult your local Agricultural Officer (AEO) if symptoms persist.",
+            "safety_notes_te": "సందేహాలు ఉంటే మీ సమీప వ్యవసాయ అధికారి (AEO)ని సంప్రదించండి.",
+            "weather_summary_en": "N/A",
+            "weather_summary_te": "వర్తించదు",
+            "audio_text_te": "ఈ చిత్రాన్ని బట్టి వ్యాధిని ఖచ్చితంగా గుర్తించలేకపోయాము. దయచేసి ప్రభావిత ఆకును దగ్గరగా, స్పష్టమైన వెలుతురులో ఫోటో తీయండి.",
+            "audio_text_en": "We could not confidently identify the condition from this image. Please take a clear, close-up photo of the affected leaf."
         }

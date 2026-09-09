@@ -1,15 +1,15 @@
 from .classifier import DiseaseClassifier
+from .real_classifier import RealDiseaseClassifier
 from .mock_classifier import MockDiseaseClassifier
 from ..config import settings
 
 def get_classifier() -> DiseaseClassifier:
     """
-    Factory method to return the active ML classifier instance based on configuration.
-    Currently defaults to MockDiseaseClassifier.
-    When a real ML model is trained, instantiate RealDiseaseClassifier here.
+    Factory method to return the active ML classifier instance.
+    Uses RealDiseaseClassifier with PyTorch trained weights.
     """
-    if settings.ML_MODEL_PROVIDER == "mock":
-        return MockDiseaseClassifier()
-    else:
-        # Fallback to mock if real provider not available
+    try:
+        return RealDiseaseClassifier()
+    except Exception as e:
+        print(f"[get_classifier WARNING] Falling back to mock due to error: {e}")
         return MockDiseaseClassifier()

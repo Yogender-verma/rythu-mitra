@@ -110,14 +110,10 @@ export const ScanDetailsPage: React.FC = () => {
                 <span className="font-bold text-forest-950 text-sm">{scan.crop}</span>
               </div>
               <div className="bg-forest-50 p-3 rounded-xl">
-                <span className="text-slate-500 font-semibold block">Stage</span>
-                <span className="font-bold text-forest-950 text-sm">{scan.crop_stage}</span>
-              </div>
-              <div className="bg-forest-50 p-3 rounded-xl">
                 <span className="text-slate-500 font-semibold block">District</span>
                 <span className="font-bold text-forest-950 text-sm">{scan.district}</span>
               </div>
-              <div className="bg-forest-50 p-3 rounded-xl">
+              <div className="bg-forest-50 p-3 rounded-xl col-span-2">
                 <span className="text-slate-500 font-semibold block">Date</span>
                 <span className="font-bold text-forest-950 text-sm">{new Date(scan.created_at).toLocaleDateString()}</span>
               </div>

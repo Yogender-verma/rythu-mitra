@@ -49,7 +49,7 @@ class UpdateProfileRequest(BaseModel):
 # Scan Schemas
 class ScanCreateRequest(BaseModel):
     crop: str  # Cotton, Paddy, Chilli, Maize
-    crop_stage: str  # Seedling, Vegetative, Flowering, Fruiting, Harvest
+    crop_stage: Optional[str] = None
     district: str
     mandal: str
     notes: Optional[str] = None
@@ -83,7 +83,7 @@ class ScanFullResponse(BaseModel):
     user_id: int
     image_url: str
     crop: str
-    crop_stage: str
+    crop_stage: Optional[str] = None
     district: str
     mandal: str
     diagnosis: DiagnosisResult
