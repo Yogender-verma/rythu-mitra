@@ -1,6 +1,7 @@
 import type { CropScanRecord } from '../types';
 
 const API_BASE = 'http://localhost:8000/api';
+const FLASK_BASE = 'http://localhost:5000/api';
 
 let currentAuthToken: string | null = null;
 
@@ -15,6 +16,40 @@ const getAuthHeaders = (extraHeaders: Record<string, string> = {}) => {
 export const api = {
   setAuthToken: (token: string | null) => {
     currentAuthToken = token;
+  },
+
+  sendOtp: async (phone: string) => {
+    try {
+      const res = await fetch(`${FLASK_BASE}/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error_te || data.error || 'Failed to send OTP');
+      }
+      return data;
+    } catch (e: any) {
+      throw new Error(e.message || 'OTP dispatch failed');
+    }
+  },
+
+  verifyOtp: async (phone: string, otp: string, language: string = 'te', name?: string) => {
+    try {
+      const res = await fetch(`${FLASK_BASE}/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp, language, name })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error_te || data.error || 'OTP verification failed');
+      }
+      return data;
+    } catch (e: any) {
+      throw new Error(e.message || 'OTP verification failed');
+    }
   },
 
   checkHealth: async () => {
@@ -135,6 +170,55 @@ export const api = {
         condition: 'Live weather unavailable',
         condition_telugu: 'లైవ్ వాతావరణ సమాచారం అందుబాటులో లేదు'
       };
+    }
+  },
+
+  getWeather: async (district = 'Karimnagar') => {
+    return api.getLiveWeather(undefined, undefined, district);
+  },
+
+  shareScanToWhatsApp: async (payload: { phone: string; scan_id?: string; message: string; image_url?: string }) => {
+    try {
+      const res = await fetch(`${FLASK_BASE}/scans/share-whatsapp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn('Flask WhatsApp dispatch notice:', err);
+      return { success: true, local_only: true };
+    }
+  },
+
+  getSettingsPhone: async (): Promise<string> => {
+    try {
+      const res = await fetch(`${FLASK_BASE}/settings/phone`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.phone) {
+          localStorage.setItem('rythumitra_settings_phone', data.phone);
+          return data.phone;
+        }
+      }
+    } catch (e) {
+      console.warn('Get settings phone notice:', e);
+    }
+    return localStorage.getItem('rythumitra_settings_phone') || '+917013224596';
+  },
+
+  saveSettingsPhone: async (phone: string): Promise<boolean> => {
+    try {
+      localStorage.setItem('rythumitra_settings_phone', phone);
+      const res = await fetch(`${FLASK_BASE}/settings/phone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      return res.ok;
+    } catch (e) {
+      console.warn('Save settings phone notice:', e);
+      return false;
     }
   },
 };

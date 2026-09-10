@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rythu Mitra — Smart Agricultural Advisory & Crop Disease Detection</title>
+  <meta name="description" content="Rythu Mitra will guide you to overcome the problems faced during cultivation of crops." />
+  <link rel="stylesheet" href="/css/landing.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0c5c2d" />
+</head>
+<body>
+
+  <!-- TOP NAVIGATION -->
+  <header class="landing-nav">
+    <a href="/" class="brand-logo">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+        <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12A10 10 0 0 1 12 2z"/>
+        <path d="M7 15a6 6 0 0 1 10 0"/>
+        <path d="M12 9v6"/>
+      </svg>
+      <div class="brand-title-wrap">
+        <span class="brand-name" data-i18n="brand_name">Rythu Mitra</span>
+        <span class="brand-subtitle" data-i18n="brand_subtitle">Smart Agricultural Platform</span>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <!-- TASK 17: TOP-RIGHT LANGUAGE SWITCHER (ENGLISH / TELUGU) -->
+      <button class="lang-toggle-btn" id="btn-landing-lang-toggle" onclick="toggleLandingLanguage()" title="Switch between English and Telugu">
+        <span>🌐</span>
+        <span id="lbl-landing-lang">English</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN HERO SECTION -->
+  <main class="landing-hero-container">
+
+    <!-- LEFT: HERO CONTENT (A) -->
+    <section class="hero-content">
+      <div class="hero-badge" data-i18n="hero_badge">
+        🌾 AI-Powered Farmer Advisory
+      </div>
+
+      <h1 class="hero-title" data-i18n="hero_title">
+        Rythu Mitra (రైతు మిత్ర)
+      </h1>
+
+      <p class="hero-tagline" data-i18n="hero_tagline">
+        "Rythu Mitra will guide you to overcome the problems faced during cultivation of crops."
+      </p>
+
+      <!-- 4 KEY PILLARS -->
+      <div class="features-grid">
+        <div class="feature-pill">
+          <div class="feat-icon">🌱</div>
+          <div class="feat-info">
+            <h4 data-i18n="feat1_title">AI Disease Detection</h4>
+            <p data-i18n="feat1_desc">Instant leaf diagnosis for Cashew, Cassava, Maize & Tomato</p>
+          </div>
+        </div>
+
+        <div class="feature-pill">
+          <div class="feat-icon">🌦️</div>
+          <div class="feat-info">
+            <h4 data-i18n="feat2_title">Climate-Aware Sprays</h4>
+            <p data-i18n="feat2_desc">Temperature & rain forecasts guide exact spray timing</p>
+          </div>
+        </div>
+
+        <div class="feature-pill">
+          <div class="feat-icon">🗣️</div>
+          <div class="feat-info">
+            <h4 data-i18n="feat3_title">Telugu & English Audio</h4>
+            <p data-i18n="feat3_desc">Synthesized voice advisories for effortless field listening</p>
+          </div>
+        </div>
+
+        <div class="feature-pill">
+          <div class="feat-icon">📱</div>
+          <div class="feat-info">
+            <h4 data-i18n="feat4_title">24/7 WhatsApp Assistant</h4>
+            <p data-i18n="feat4_desc">Send leaf photos directly through WhatsApp Cloud API</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: PHONE LOGIN & REGISTRATION MODULE (B & C) -->
+    <section class="auth-card" id="auth-module">
+      <div class="auth-header">
+        <h2 class="auth-title" data-i18n="auth_title">Farmer Login & Register</h2>
+        <p class="auth-subtitle" data-i18n="auth_subtitle">
+          Enter your 10-digit mobile number to access your portal.
+        </p>
+      </div>
+
+      <!-- STEP 1: PHONE INPUT -->
+      <div id="auth-step-phone">
+        <div class="form-group">
+          <label class="form-label" for="landing-phone-input" data-i18n="lbl_phone">10-Digit Mobile Number</label>
+          <div class="phone-input-wrap">
+            <span class="phone-prefix">+91</span>
+            <input 
+              type="tel" 
+              id="landing-phone-input" 
+              class="phone-input" 
+              placeholder="e.g. 9876543210" 
+              maxlength="10" 
+              autocomplete="tel" 
+              data-i18n-placeholder="phone_placeholder" 
+            />
+          </div>
+          <p class="error-text" id="landing-phone-error" data-i18n="err_invalid_phone">
+            Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.
+          </p>
+        </div>
+
+        <button type="button" class="btn-auth-primary" id="btn-send-otp" onclick="handleSendOTP()">
+          <span data-i18n="btn_send_otp">Send OTP →</span>
+        </button>
+      </div>
+
+      <!-- STEP 2: OTP VERIFICATION -->
+      <div id="auth-step-otp" style="display: none;">
+        <div class="form-group">
+          <label class="form-label" for="landing-otp-input" data-i18n="lbl_enter_otp">
+            Enter 6-Digit Verification OTP
+          </label>
+          <p style="font-size: 12px; color: #475569; margin-bottom: 10px;">
+            <span data-i18n="msg_code_sent_to">Code dispatched to</span>: <strong id="otp-sent-phone" style="color: #0c5c2d;"></strong>
+          </p>
+          <input 
+            type="text" 
+            id="landing-otp-input" 
+            class="otp-input-box" 
+            placeholder="••••••" 
+            maxlength="6" 
+            autocomplete="one-time-code" 
+          />
+          <p class="otp-hint" id="landing-mock-hint" data-i18n="mock_otp_hint">Default test code: 123456</p>
+          <p class="error-text" id="landing-otp-error" data-i18n="err_invalid_otp">
+            Invalid or expired OTP. Please use the test code 123456.
+          </p>
+        </div>
+
+        <button type="button" class="btn-auth-primary" id="btn-verify-otp" onclick="handleVerifyOTP()">
+          <span data-i18n="btn_verify_otp">Verify & Continue →</span>
+        </button>
+
+        <button type="button" class="btn-auth-secondary" onclick="handleBackToPhone()" data-i18n="btn_change_phone">
+          Change Phone Number
+        </button>
+      </div>
+
+      <!-- TRUST GUARANTEES -->
+      <div class="trust-badges">
+        <span data-i18n="trust_pjtsau">🏛️ PJTSAU Standard Certified</span>
+        <span>•</span>
+        <span data-i18n="trust_secure">🔒 100% Secure & Private</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CASE 2: GREEN REGISTRATION SUCCESS NOTIFICATION MODAL -->
+  <div class="modal-overlay" id="landing-success-modal">
+    <div class="modal-window">
+      <div class="success-icon-wrap">
+        ✓
+      </div>
+      <h3 class="success-title" data-i18n="reg_success_title">Successfully Registered</h3>
+      <p class="success-desc" data-i18n="reg_success_desc">
+        Welcome to Rythu Mitra! Your account has been initialized with the 1-Year Harvest Premium Tier 01 subscription.
+      </p>
+      <button type="button" class="btn-success-ok" onclick="handleRegistrationOk()" data-i18n="btn_ok">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <p data-i18n="footer_text">© 2026 Rythu Mitra — Empowering Indian Farmers with Smart Agricultural Intelligence.</p>
+  </footer>
+
+  <script src="/js/landing.js"></script>
+</body>
+</html>

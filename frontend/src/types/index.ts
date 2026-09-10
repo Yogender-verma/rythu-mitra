@@ -10,6 +10,11 @@ export interface User {
   name: string;
   email?: string;
   phone?: string;
+  district?: string;
+  mandal?: string;
+  village?: string;
+  preferred_crop?: string;
+  voice_speed?: string;
   auth_provider?: string;
   language: 'te' | 'en';
   profile_photo?: string;
@@ -46,11 +51,20 @@ export interface Advisory {
   dosage_te?: string;
   safety_notes_en?: string;
   safety_notes_te?: string;
+  medicine_name_en?: string;
+  medicine_name_te?: string;
+  medicine_image?: string;
+  medicine_type_en?: string;
+  medicine_type_te?: string;
+  product_name?: string;
+  product_image?: string;
   weather_summary_en?: string;
   weather_summary_te?: string;
   audio_text_en?: string;
   audio_text_te?: string;
   audio_url?: string;
+  audio_url_te?: string;
+  audio_url_en?: string;
 }
 
 export interface WeatherData {
@@ -62,6 +76,8 @@ export interface WeatherData {
   condition: string;
   condition_telugu?: string;
   weather_code?: number;
+  insight_en?: string;
+  insight_te?: string;
 }
 
 export interface CropScanRecord {
@@ -77,6 +93,8 @@ export interface CropScanRecord {
   advisory: Advisory;
   weather?: WeatherData;
   audio_url?: string;
+  audio_url_te?: string;
+  audio_url_en?: string;
   created_at: string;
 }
 

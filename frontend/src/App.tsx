@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LandingPage } from './pages/LandingPage';
@@ -68,10 +69,14 @@ export const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <ErrorBoundary>
+            <AppContent />
+          </ErrorBoundary>
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

@@ -5,14 +5,22 @@ frontend/.vite/
 *.log
 
 # Python / Backend
+__pycache__/
+core/__pycache__/
 backend/__pycache__/
 backend/app/__pycache__/
 backend/app/*/__pycache__/
+*.db
+*.sqlite
+*.sqlite3
 backend/*.db
+audio_cache/
 backend/audio_cache/
 *.pyc
 *.pyo
 .env
+.env.*
+settings_phone.txt
 .venv/
 env/
 venv/
@@ -22,3 +30,4 @@ dataset/
 dataset_raw/
 dataset_target_crops/
 scratch_test/
+
