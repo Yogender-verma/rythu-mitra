@@ -15,17 +15,17 @@ export const Sidebar: React.FC = () => {
       icon: LayoutDashboard,
     },
     {
-      name: language === 'te' ? 'క్రాప్ స్కాన్' : 'Scan',
+      name: language === 'te' ? 'పంట స్కాన్' : 'Crop Scan',
       path: '/scan',
       icon: ScanLine,
     },
     {
-      name: language === 'te' ? 'గత శోధనలు' : 'Past Search',
+      name: language === 'te' ? 'గత శోధనలు' : 'Past Searches',
       path: '/history',
       icon: History,
     },
     {
-      name: language === 'te' ? 'చందాలు' : 'Subscriptions',
+      name: language === 'te' ? 'చందాలు & ప్లాన్‌లు' : 'Subscriptions',
       path: '/subscriptions',
       icon: CreditCard,
     },
@@ -99,8 +99,12 @@ export const Sidebar: React.FC = () => {
               className="w-10 h-10 rounded-full object-cover border-2 border-[#2E7D32]"
             />
             <div className="flex flex-col truncate">
-              <span className="text-xs font-black text-black truncate">{user?.name || 'Telangana Farmer'}</span>
-              <span className="text-[10px] text-black font-extrabold truncate">{user?.phone || user?.email || '+91 Telangana'}</span>
+              <span className="text-xs font-black text-black truncate">
+                {user?.name || (language === 'te' ? 'రైతు సోదరుడు' : 'Telangana Farmer')}
+              </span>
+              <span className="text-[10px] text-black font-extrabold truncate">
+                {user?.phone || user?.email || (language === 'te' ? '+91 తెలంగాణ రైతు' : '+91 Telangana Farmer')}
+              </span>
             </div>
           </div>
           <button
@@ -108,7 +112,7 @@ export const Sidebar: React.FC = () => {
               logout();
               navigate('/');
             }}
-            title="Logout"
+            title={language === 'te' ? 'లాగౌట్' : 'Logout'}
             className="p-2 text-black hover:bg-[#A5D6A7] hover:text-red-700 rounded-xl transition-colors"
           >
             <LogOut className="w-4 h-4 text-black" />

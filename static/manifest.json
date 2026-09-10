@@ -1,0 +1,17 @@
+{
+  "name": "Rythu Mitra - Farmer's Friend",
+  "short_name": "RythuMitra",
+  "description": "Smart Agricultural Advisory Platform with Telugu Voice Notes and WhatsApp Diagnostics",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f3",
+  "theme_color": "#0a5226",
+  "icons": [
+    {
+      "src": "/images/healthy_crop.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

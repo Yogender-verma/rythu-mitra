@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rythu Mitra - Harvest Dashboard & Crop Advisory</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0a5226" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="/js/idb-history.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- LEFT SIDEBAR (Harvest Dashboard) -->
+    <aside class="sidebar">
+      <a href="#" class="brand-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+        </svg>
+        <span data-i18n="brand_title">Harvest Dashboard</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#dashboard" class="nav-item active" id="nav-home">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span data-i18n="nav_home">Home</span>
+        </a>
+
+        <a href="#scan-section" class="nav-item" id="nav-scan">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+            <circle cx="12" cy="13" r="3"/>
+          </svg>
+          <span data-i18n="nav_scan">Scan Crop</span>
+        </a>
+
+        <a href="#payment-section" class="nav-item" id="nav-payment" onclick="scrollToPayment()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect width="20" height="14" x="2" y="5" rx="2"/>
+            <line x1="2" x2="22" y1="10" y2="10"/>
+          </svg>
+          <span data-i18n="nav_payment">Payment Mode</span>
+        </a>
+
+        <a href="#history-section" class="nav-item" id="nav-history" onclick="scrollToHistory()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span data-i18n="nav_history">Offline History</span>
+        </a>
+
+        <a href="#auth-modal" class="nav-item" onclick="openAuthModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span id="nav-auth-text" data-i18n="nav_auth">Sign In / Register</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN VIEW -->
+    <main class="main-area">
+      
+      <!-- TOP HEADER WITH TASK 5 LANGUAGE SWITCHER & TASK 6 DEVICE LOCATION -->
+      <header class="top-header">
+        <div class="search-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7e8a7c" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search metrics, crops, diseases..." data-i18n-placeholder="search_placeholder" />
+        </div>
+
+        <div class="header-actions">
+          <!-- TASK 6: Device Location Button -->
+          <button class="location-pill-btn" id="btn-location" onclick="handleLocationClick()" title="Enable local weather & climate advisory">
+            <span>📍</span>
+            <span id="lbl-location" data-i18n="btn_allow_location">Allow Location</span>
+          </button>
+
+          <!-- TASK 5: Top-Right Language Switcher (English / Telugu) -->
+          <button class="lang-toggle-btn" id="btn-lang-toggle" onclick="toggleLanguage()" title="Switch language between English and Telugu">
+            <span>🌐</span>
+            <span id="lbl-current-lang">English</span>
+          </button>
+
+          <button class="icon-btn" title="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+            </svg>
+          </button>
+          
+          <div class="profile-avatar-sm" id="header-avatar">
+            AM
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT BODY -->
+      <div class="content-body">
+
+        <!-- HERO BRANDING SECTION -->
+        <div style="background: #eef8f0; border: 1px solid #c9ebd1; border-radius: 20px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-size: 20px; font-weight: 800; color: #0c5c2d;" data-i18n="hero_title">Rythu Mitra (రైతు మిత్ర)</h2>
+            <p style="font-size: 13px; color: #3b4e3e; margin-top: 4px; font-weight: 600;" data-i18n="hero_tagline">
+              "Rythu Mitra will guide you to overcome the problems faced during cultivation of crops."
+            </p>
+          </div>
+          <button onclick="scrollToScan()" class="btn-primary" style="padding: 10px 20px; font-size: 13px;" data-i18n="btn_quick_scan">
+            📷 Quick Camera Scan
+          </button>
+        </div>
+
+        <!-- 1. ACCOUNT SUBSCRIBER CARD (Harvest Dashboard) -->
+        <div class="card subscriber-card">
+          <div class="subscriber-top">
+            <div class="subscriber-profile">
+              <div class="avatar-large" id="dash-avatar">AM</div>
+              <div class="subscriber-meta">
+                <span class="sub-tag" data-i18n="lbl_subscriber_tag">ACCOUNT SUBSCRIBER</span>
+                <div class="sub-name-row">
+                  <span class="sub-name" id="dash-name">Alex Morgan</span>
+                  <svg class="verified-badge" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l2.4 2.8 3.7-.5 1.1 3.5 3.3 1.8-1.4 3.4 1.8 3.3-3.5 1.1-.5 3.7-3.9.7L12 22l-2.4-2.8-3.7.5-1.1-3.5-3.3-1.8 1.4-3.4-1.8-3.3 3.5-1.1.5-3.7 3.9-.7L12 2z"/>
+                  </svg>
+                </div>
+                <span class="sub-phone" id="dash-phone">+1 (555) 382-9104</span>
+              </div>
+            </div>
+
+            <div class="status-pill">
+              <span class="status-dot"></span>
+              <span id="dash-status" data-i18n="status_active">Active</span>
+            </div>
+          </div>
+
+          <div class="subscriber-dates">
+            <div class="date-block">
+              <span class="date-lbl" data-i18n="lbl_start_date">Start Date</span>
+              <span class="date-val" id="dash-start">15 Jan 2024</span>
+            </div>
+            <div class="date-block">
+              <span class="date-lbl" data-i18n="lbl_expiry_date">Expiry Date</span>
+              <span class="date-val" id="dash-expiry">15 Jan 2025</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. SUBSCRIPTION DURATION CARD -->
+        <div class="card duration-card">
+          <div class="duration-header">
+            <span class="duration-title" data-i18n="duration_title">Subscription Duration</span>
+            <span class="duration-remaining" id="dash-days-remaining">284 Days Remaining</span>
+          </div>
+
+          <p class="duration-text" id="dash-duration-text" data-i18n="duration_subtitle">
+            Your subscription is currently active with 81 days elapsed out of 365 total scheduled cycle duration.
+          </p>
+
+          <div class="progress-track">
+            <div class="progress-fill" id="dash-progress-bar" style="width: 22%;"></div>
+          </div>
+
+          <div class="duration-labels">
+            <span id="dash-day-elapsed">Day 81 (Elapsed)</span>
+            <span id="dash-day-expiry">Day 365 (Expiry)</span>
+          </div>
+        </div>
+
+        <!-- 3. HARVEST PREMIUM ANNUAL TIER 01 PLAN -->
+        <div class="premium-card">
+          <span class="tier-badge" data-i18n="tier_badge">HARVEST PREMIUM ANNUAL</span>
+          <h2 class="tier-heading" data-i18n="tier_heading">Tier 01 Plan</h2>
+          <p class="tier-desc" data-i18n="tier_desc">
+            Secure your yield stream for the upcoming cycle with guaranteed priority allocation.
+          </p>
+          <button class="btn-renew" onclick="scrollToPayment()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            <span data-i18n="btn_buy_renew">Buy / Renew Subscription</span>
+          </button>
+        </div>
+
+        <!-- 4. SECURE & PROTECTED FEATURES -->
+        <div class="card secure-card">
+          <div class="secure-header">
+            <div class="shield-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <span data-i18n="secure_heading">Secure & Protected</span>
+          </div>
+
+          <div class="features-list">
+            <div class="feature-pill">
+              <span class="feature-check">✓</span>
+              <span data-i18n="feat_priority_yield">Priority Yield Distribution</span>
+            </div>
+            <div class="feature-pill">
+              <span class="feature-check">✓</span>
+              <span data-i18n="feat_realtime_sync">Real-time Telemetry Sync</span>
+            </div>
+            <div class="feature-pill">
+              <span class="feature-check">✓</span>
+              <span data-i18n="feat_agronomist_support">Dedicated Agronomist Support</span>
+            </div>
+            <div class="feature-pill">
+              <span class="feature-check">✓</span>
+              <span data-i18n="feat_zero_fee">Zero-fee Harvest Transfers</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TASK 3: UPLOAD IMAGE & LIVE CAMERA DIAGNOSTIC SECTION -->
+        <div class="card scan-card" id="scan-section">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h3 style="font-size: 19px; font-weight: 800; color: #0a4f25;" data-i18n="scan_heading">📷 Crop Disease Detection & Diagnosis</h3>
+              <p style="font-size: 13px; color: #455a4a; margin-top: 4px;" data-i18n="scan_subtitle">
+                Upload or capture a crop leaf photo (Cashew, Cassava, Maize, Tomato) to detect diseases with climate-aware advisory.
+              </p>
+            </div>
+          </div>
+
+          <!-- Live Camera / Image Preview Box -->
+          <div class="camera-preview-box" id="camera-box">
+            <video id="webcam-video" autoplay playsinline style="display: none;"></video>
+            <canvas id="capture-canvas" style="display: none;"></canvas>
+            <img id="image-preview" src="" style="display: none;" alt="Preview" />
+            <div id="camera-placeholder" style="text-align: center; color: #94a3b8; padding: 20px;">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin-bottom: 8px;">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                <circle cx="12" cy="13" r="3"/>
+              </svg>
+              <p style="font-weight: 600; font-size: 14px;" data-i18n="camera_off_title">No Image Selected</p>
+              <p style="font-size: 12px; color: #64748b;" data-i18n="camera_off_subtitle">Select a file from gallery or activate camera to start</p>
+            </div>
+          </div>
+
+          <!-- Initial Controls -->
+          <div class="camera-controls" id="initial-controls">
+            <button class="btn-primary" id="btn-open-camera" onclick="promptCameraPermission()">
+              📹 <span data-i18n="btn_open_camera">Open Camera</span>
+            </button>
+            <button class="btn-primary" id="btn-snap-photo" onclick="captureSnapshot()" style="display: none; background: #16a34a;">
+              📸 <span data-i18n="btn_snap_photo">Capture Photo</span>
+            </button>
+            <label class="btn-outline" style="cursor: pointer;">
+              📁 <span data-i18n="btn_upload_gallery">Upload from Gallery</span>
+              <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="handleFileSelected(event)" />
+            </label>
+          </div>
+
+          <!-- TASK 3: Change Image / Remove Image Controls (Shown once an image is selected) -->
+          <div class="image-actions-bar" id="selected-image-actions" style="display: none;">
+            <button class="btn-primary" id="btn-diagnose" onclick="submitDiagnostic()">
+              🔍 <span data-i18n="btn_analyze_diagnose">Analyze & Diagnose</span>
+            </button>
+            <label class="btn-secondary" style="cursor: pointer;">
+              🔄 <span data-i18n="btn_change_image">Change Image</span>
+              <input type="file" id="change-file-input" accept="image/*" style="display: none;" onchange="handleFileSelected(event)" />
+            </label>
+            <button class="btn-danger" id="btn-remove-image" onclick="removeSelectedImage()">
+              🗑️ <span data-i18n="btn_remove_image">Remove Image</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TASK 3, 4, 7, 11: DIAGNOSTIC RESULTS & CLIMATE-AWARE ADVISORY -->
+        <div class="card result-card" id="result-box" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 800; color: #0c5c2d; text-transform: uppercase;" data-i18n="res_tag">AI Crop Diagnostic Result</span>
+              <h2 style="font-size: 24px; font-weight: 800; color: #111a12; margin-top: 2px;" id="res-crop-disease">Tomato - Leaf Blight</h2>
+              <p style="font-size: 15px; font-weight: 700; color: #0c5c2d;" id="res-disease-telugu">టమోటా ఆకు మాగుడు తెగులు</p>
+            </div>
+            <span class="badge badge-risk-high" id="res-risk-badge">High Risk</span>
+          </div>
+
+          <div class="result-badge-row">
+            <span class="badge" style="background: #e2e8f0; color: #334155;" id="res-confidence">Confidence: 88%</span>
+            <span class="badge" style="background: #e0f2fe; color: #0369a1;" data-i18n="res_pjtsau_badge">PJTSAU Verified Standard</span>
+          </div>
+
+          <!-- TASK 3: Low Confidence Uncertain Warning Alert -->
+          <div class="uncertain-warning-box" id="res-uncertain-alert" style="display: none;">
+            <span class="uncertain-icon">⚠️</span>
+            <div>
+              <strong style="color: #92400e; font-size: 14px;" data-i18n="warn_uncertain_title">Low Confidence Prediction (Uncertain)</strong>
+              <p style="color: #78350f; font-size: 13px; margin-top: 4px;" data-i18n="warn_uncertain_desc">
+                The AI model confidence is below 60%. Rather than applying chemical treatments based solely on an uncertain diagnosis, we strongly advise consulting an agricultural extension officer or local PJTSAU agronomist.
+              </p>
+            </div>
+          </div>
+
+          <!-- Problem Description -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 14px;">
+            <h4 style="font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 6px;" data-i18n="heading_description">📖 Problem Description</h4>
+            <p style="font-size: 13px; color: #475569; line-height: 1.5;" id="res-description"></p>
+          </div>
+
+          <!-- Organic and Chemical Solutions -->
+          <div style="margin-top: 14px; display: grid; grid-template-columns: 1fr; gap: 14px;">
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 16px; padding: 16px;">
+              <h4 style="font-size: 14px; font-weight: 800; color: #166534; margin-bottom: 6px;" data-i18n="heading_organic">🌱 Organic Treatment (సేంద్రీయ నివారణ)</h4>
+              <p style="font-size: 13px; color: #14532d; white-space: pre-line;" id="res-organic"></p>
+            </div>
+
+            <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 16px; padding: 16px;">
+              <h4 style="font-size: 14px; font-weight: 800; color: #854d0e; margin-bottom: 6px;" data-i18n="heading_chemical">🧪 Chemical Treatment (రసాయనిక మందులు)</h4>
+              <p style="font-size: 13px; color: #713f12; white-space: pre-line;" id="res-chemical"></p>
+            </div>
+
+            <div style="background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 16px; padding: 16px;">
+              <h4 style="font-size: 14px; font-weight: 800; color: #9d174d; margin-bottom: 6px;" data-i18n="heading_precautions">⚠️ Precautions & Safety (జాగ్రత్తలు)</h4>
+              <p style="font-size: 13px; color: #831843; white-space: pre-line;" id="res-precautions"></p>
+            </div>
+          </div>
+
+          <!-- Product Recommendation Card with Product Packaging Image -->
+          <div class="product-box">
+            <img id="res-product-image" class="product-img" src="/images/mancozeb.svg" alt="Product" />
+            <div class="product-details">
+              <span style="font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase;" data-i18n="lbl_recommended_product">RECOMMENDED AGRO-MEDICINE</span>
+              <h4 style="font-size: 16px; font-weight: 800; color: #0f172a;" id="res-product-name">Mancozeb 75% WP (Dithane M-45)</h4>
+              <p style="font-size: 13px; color: #475569;" id="res-product-dosage">Dosage: 2.5g per Liter of water</p>
+              <span style="font-size: 11px; font-weight: 700; color: #16a34a;" data-i18n="lbl_certified_grade">✓ Certified Agricultural Formulation</span>
+            </div>
+          </div>
+
+          <!-- TASK 7: Climate-Aware Advisory Card -->
+          <div class="climate-advisory-card" id="climate-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 20px;">🌦️</span>
+                <strong style="font-size: 14px; color: #075985;" data-i18n="heading_climate_advisory">Climate-Aware Environmental Advisory</strong>
+              </div>
+              <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 999px; font-weight: 700;" id="weather-badge">
+                Local Telemetry
+              </span>
+            </div>
+            <p style="font-size: 13px; color: #0c4a6e; line-height: 1.5;" id="res-climate-text">
+              Environmental conditions are currently stable. Observe standard morning spray recommendations.
+            </p>
+          </div>
+
+          <!-- TASK 11: Audio Voice Note Advisory Player (English or Telugu) -->
+          <div class="audio-player-box" id="audio-player-container">
+            <button class="audio-play-btn" id="audio-play-toggle" onclick="toggleAudio()">▶</button>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #2d3b2e; margin-bottom: 4px;">
+                <span id="audio-player-title" data-i18n="audio_title">🔊 Voice Advisory (వాయిస్ సలహా)</span>
+                <span id="audio-timer">0:00</span>
+              </div>
+              <input type="range" id="audio-seek" value="0" min="0" max="100" style="width: 100%; accent-color: var(--primary-forest);" oninput="seekAudio(this.value)" />
+            </div>
+            <audio id="advisory-audio-element" style="display: none;" ontimeupdate="updateAudioProgress()" onended="onAudioEnded()"></audio>
+          </div>
+        </div>
+
+        <!-- PAYMENT MODE / SUBSCRIPTION SECTION (Before History Mode) -->
+        <div class="card payment-section-card" id="payment-section">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 42px; height: 42px; border-radius: 12px; background: #eaf5ee; color: #0c5c2d; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                  💳
+                </div>
+                <div>
+                  <h3 style="font-size: 18px; font-weight: 800; color: #0c5c2d;" data-i18n="heading_payment_mode">Payment & Subscription Mode</h3>
+                  <p style="font-size: 13px; color: #556252; margin-top: 2px;" data-i18n="payment_section_subtitle">
+                    Manage your advisory membership plan. Click Proceed below to choose your payment options.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div style="background: #eaf5ee; border: 1px solid #bce2c7; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #0c5c2d;" id="payment-current-status">
+              ● <span data-i18n="status_active">Active</span>: <span id="payment-plan-tag">Tier 01 Plan</span>
+            </div>
+          </div>
+
+          <!-- Plan Details Box -->
+          <div class="payment-plan-overview">
+            <div class="plan-details-left">
+              <span class="sub-tag" style="color: #0c5c2d;" data-i18n="tier_badge">HARVEST PREMIUM ANNUAL</span>
+              <h4 style="font-size: 22px; font-weight: 800; color: #141b14; margin: 4px 0 6px;" data-i18n="tier_heading">Tier 01 Plan</h4>
+              <p style="font-size: 13px; color: #556252; line-height: 1.5;" data-i18n="tier_desc">
+                Secure your yield stream for the upcoming cycle with guaranteed priority allocation and full PJTSAU agronomist advisory.
+              </p>
+
+              <div class="plan-feature-list">
+                <div class="plan-feature-item">
+                  <span class="check-icon">✓</span>
+                  <span data-i18n="feat_unlimited_scans">Unlimited AI Crop Disease Detection (22 Categories)</span>
+                </div>
+                <div class="plan-feature-item">
+                  <span class="check-icon">✓</span>
+                  <span data-i18n="feat_weather_alerts">Real-time Weather & Climate Spray Timing Advisory</span>
+                </div>
+                <div class="plan-feature-item">
+                  <span class="check-icon">✓</span>
+                  <span data-i18n="feat_voice_telugu">Telugu & English Voice Note Synthesized Advisories</span>
+                </div>
+                <div class="plan-feature-item">
+                  <span class="check-icon">✓</span>
+                  <span data-i18n="feat_whatsapp_cloud">Meta WhatsApp Cloud Integration & Offline Storage</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-pricing-right">
+              <span style="font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase;" data-i18n="lbl_annual_fee">Annual Membership</span>
+              <div style="display: flex; align-items: baseline; gap: 4px; margin: 8px 0 16px;">
+                <span style="font-size: 36px; font-weight: 900; color: #0c5c2d;">₹999</span>
+                <span style="font-size: 14px; color: #64748b; font-weight: 600;" data-i18n="lbl_per_year">/ Year</span>
+              </div>
+              
+              <!-- PROCEED BUTTON: Opens payment options modal when clicked -->
+              <button class="btn-proceed-payment" id="btn-proceed" onclick="openPaymentModal()">
+                <span data-i18n="btn_proceed_payment">Proceed</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+
+              <span style="font-size: 11px; color: #64748b; margin-top: 10px; display: flex; align-items: center; gap: 4px;">
+                🔒 <span data-i18n="lbl_secure_checkout">100% Secure Checkout via UPI / Card / Net Banking</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- OFFLINE-CAPABLE DIAGNOSTIC HISTORY -->
+        <div class="card" id="history-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h3 style="font-size: 17px; font-weight: 800; color: #121b13;" data-i18n="heading_history">📂 Offline Diagnostic History</h3>
+            <span style="font-size: 12px; font-weight: 700; color: #16a34a; background: #eaf8ed; padding: 4px 10px; border-radius: 999px;" data-i18n="badge_indexeddb">
+              IndexedDB & Cache Active
+            </span>
+          </div>
+          <div id="history-list" style="display: flex; flex-direction: column; gap: 10px;">
+            <p style="font-size: 13px; color: #6d786b;" data-i18n="msg_loading_history">Loading cached scans...</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODALS -->
+  <!-- ========================================================================= -->
+
+  <!-- GEOLOCATION PERMISSION EXPLANATION MODAL (Task 6) -->
+  <div class="modal-overlay" id="geo-modal">
+    <div class="modal-window">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+          📍
+        </div>
+        <div>
+          <h3 data-i18n="geo_modal_title">Device Location Access</h3>
+          <p style="font-size: 13px; color: #64748b;" data-i18n="geo_modal_desc">
+            Rythu Mitra requests your approximate location solely to fetch real-time local weather (temperature, humidity, rain probability) for climate-aware spray recommendations.
+          </p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-primary" onclick="requestBrowserLocation()" style="flex: 1; justify-content: center;" data-i18n="btn_allow_location_action">
+          Allow Location
+        </button>
+        <button class="btn-outline" onclick="closeModal('geo-modal')" style="flex: 1; text-align: center;" data-i18n="btn_deny_location_action">
+          Not Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMERA PERMISSION MODAL -->
+  <div class="modal-overlay" id="perm-modal">
+    <div class="modal-window">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+          📷
+        </div>
+        <div>
+          <h3 data-i18n="cam_modal_title">Camera Permission</h3>
+          <p style="font-size: 13px; color: #64748b;" data-i18n="cam_modal_desc">Rythu Mitra requires camera access to capture crop leaf photos.</p>
+        </div>
+      </div>
+
+      <div class="permission-options">
+        <button class="permission-btn" onclick="grantCameraPermission('always')">
+          <strong data-i18n="perm_always">Always Allow</strong>
+          <p style="font-size: 12px; color: #64748b;" data-i18n="perm_always_desc">Allow camera whenever this app is used.</p>
+        </button>
+        <button class="permission-btn" onclick="grantCameraPermission('while_using')">
+          <strong data-i18n="perm_while_using">While Using the App</strong>
+          <p style="font-size: 12px; color: #64748b;" data-i18n="perm_while_using_desc">Allow camera during active session.</p>
+        </button>
+        <button class="permission-btn" onclick="grantCameraPermission('ask_every_time')">
+          <strong data-i18n="perm_ask">Ask Every Time</strong>
+          <p style="font-size: 12px; color: #64748b;" data-i18n="perm_ask_desc">Prompt on each scan attempt.</p>
+        </button>
+      </div>
+
+      <button class="btn-outline" onclick="closeModal('perm-modal')" style="text-align: center;" data-i18n="btn_cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- PHONE LOGIN / REGISTER MODAL -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-window">
+      <h3 style="font-size: 20px; font-weight: 800;" data-i18n="auth_modal_title">Farmer Login & Register</h3>
+      <p style="font-size: 13px; color: #64748b;" data-i18n="auth_modal_desc">Enter your 10-digit mobile number to access your Harvest Dashboard.</p>
+
+      <div id="step-phone" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #334155;" data-i18n="lbl_phone">10-Digit Mobile Number</label>
+          <input type="tel" id="auth-phone-input" placeholder="e.g. 9876543210" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-cream); margin-top: 4px; font-size: 16px;" />
+        </div>
+        <button class="btn-primary" onclick="requestOTP()" style="justify-content: center;" data-i18n="btn_send_otp">Send OTP</button>
+      </div>
+
+      <div id="step-otp" style="display: none; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #334155;" data-i18n="lbl_enter_otp">Enter 6-Digit Verification OTP</label>
+          <input type="text" id="auth-otp-input" placeholder="123456" maxlength="6" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-cream); margin-top: 4px; font-size: 20px; letter-spacing: 4px; text-align: center;" />
+          <p style="font-size: 11px; color: #16a34a; margin-top: 4px;" id="mock-otp-hint">Default test OTP: 123456</p>
+        </div>
+        <button class="btn-primary" onclick="verifyOTP()" style="justify-content: center;" data-i18n="btn_verify_otp">Verify & Sign In</button>
+        <button class="btn-outline" onclick="backToPhoneStep()" style="text-align: center;" data-i18n="btn_change_phone">Change Phone Number</button>
+      </div>
+
+      <button class="btn-outline" onclick="closeModal('auth-modal')" style="text-align: center;" data-i18n="btn_close">Close</button>
+    </div>
+  </div>
+
+  <!-- REGISTRATION SUCCESS MODAL -->
+  <div class="modal-overlay" id="reg-success-modal">
+    <div class="modal-window success-modal">
+      <div class="success-icon">✓</div>
+      <h3 style="font-size: 22px; font-weight: 800; color: #15803d;" data-i18n="reg_success_title">Successfully Registered</h3>
+      <p style="font-size: 14px; color: #475569; line-height: 1.4;" data-i18n="reg_success_desc">
+        Welcome to Rythu Mitra! Your account has been initialized with the 1-Year Harvest Premium Tier 01 subscription.
+      </p>
+      <button class="btn-primary" onclick="onRegistrationOk()" style="width: 100%; justify-content: center; padding: 14px 28px; font-size: 16px;" data-i18n="btn_ok">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <!-- PAYMENT GATEWAY MODAL -->
+  <div class="modal-overlay" id="payment-modal">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 20px; font-weight: 800;" data-i18n="payment_modal_title">Renew Subscription</h3>
+        <span style="font-size: 18px; font-weight: 900; color: #0c5c2d;">₹999.00</span>
+      </div>
+      <p style="font-size: 13px; color: #64748b;" data-i18n="payment_plan_desc">Plan: Harvest Premium Annual Tier 01 (365 Days Access)</p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <label style="font-size: 13px; font-weight: 700; color: #1e293b;" data-i18n="lbl_select_payment">Select Payment Method</label>
+        
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-outline" id="pay-upi" style="flex: 1; border-color: #0c5c2d; background: #eaf5ee;" onclick="selectPaymentMethod('UPI')">
+            📱 UPI (GPay/PhonePe)
+          </button>
+          <button class="btn-outline" id="pay-card" style="flex: 1;" onclick="selectPaymentMethod('CARD')">
+            💳 Card
+          </button>
+          <button class="btn-outline" id="pay-net" style="flex: 1;" onclick="selectPaymentMethod('NETBANKING')">
+            🏦 Net Banking
+          </button>
+        </div>
+
+        <div id="upi-box" style="padding: 14px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+          <p style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;" data-i18n="msg_upi_qr">Scan UPI QR Code or Enter VPA</p>
+          <div style="width: 120px; height: 120px; background: #ffffff; border: 2px dashed #0c5c2d; border-radius: 12px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #0c5c2d;">
+            [ UPI QR CODE ]
+          </div>
+          <p style="font-size: 11px; color: #64748b; margin-top: 6px;">VPA: <strong>rythumitra@okhdfcbank</strong></p>
+        </div>
+
+        <div id="card-box" style="display: none; padding: 14px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; flex-direction: column; gap: 8px;">
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: #475569;">Card Number</label>
+            <input type="text" placeholder="•••• •••• •••• ••••" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;" />
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <div style="flex: 1;">
+              <label style="font-size: 11px; font-weight: 700; color: #475569;">MM/YY</label>
+              <input type="text" placeholder="12/28" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;" />
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 11px; font-weight: 700; color: #475569;">CVV</label>
+              <input type="password" placeholder="•••" maxlength="4" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;" />
+            </div>
+          </div>
+        </div>
+
+        <div id="net-box" style="display: none; padding: 14px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Select Bank</label>
+          <select style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
+            <option>State Bank of India (SBI)</option>
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>Axis Bank</option>
+            <option>Andhra Pradesh Grameena Vikas Bank (APGVB)</option>
+            <option>Telangana Grameena Bank (TGB)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="processPayment()" style="justify-content: center; padding: 14px; font-size: 15px;" data-i18n="btn_pay_activate">
+        Pay ₹999 & Activate Plan
+      </button>
+      <button class="btn-outline" onclick="closeModal('payment-modal')" style="text-align: center;" data-i18n="btn_cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- DIGITAL RECEIPT MODAL -->
+  <div class="modal-overlay" id="receipt-modal">
+    <div class="modal-window">
+      <div style="text-align: center;">
+        <span style="font-size: 32px;">🧾</span>
+        <h3 style="font-size: 20px; font-weight: 800; color: #0c5c2d; margin-top: 6px;" data-i18n="receipt_title">Payment Successful</h3>
+        <p style="font-size: 12px; color: #64748b;" data-i18n="receipt_subtitle">Digital Harvest Receipt</p>
+      </div>
+
+      <div style="background: #faf8f3; border: 1px solid var(--border-cream); border-radius: 16px; padding: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #64748b;">Transaction ID:</span>
+          <strong id="rcpt-tx">pay_89218201</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #64748b;">Plan:</span>
+          <strong id="rcpt-plan">Harvest Premium Tier 01</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #64748b;">Amount Paid:</span>
+          <strong style="color: #0c5c2d;" id="rcpt-amount">₹999.00</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #64748b;">Valid Until:</span>
+          <strong id="rcpt-valid">15 Jan 2025</strong>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="closeModal('receipt-modal')" style="justify-content: center;" data-i18n="btn_done">Done</button>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -17,6 +17,7 @@ class RealDiseaseClassifier(DiseaseClassifier):
     TELUGU_CLASS_MAP = {
         # Cotton
         "Cotton_Bacterial_Blight": ("Cotton", "Bacterial Blight (Xanthomonas malvacearum)", "ప్రత్తి బ్యాక్టీరియల్ ఆకు మచ్చ తెగులు", "High"),
+        "Cotton_Fusarium_Wilt": ("Cotton", "Fusarium Wilt (Fusarium oxysporum)", "ప్రత్తి ఎండు తెగులు / ఫ్యుసేరియం విల్ట్", "High"),
         "Cotton_Diseased_Plant": ("Cotton", "Diseased Cotton Plant", "బాధిత ప్రత్తి మొక్క", "High"),
         "Cotton_Healthy": ("Cotton", "Healthy Cotton Crop", "ఆరోగ్యకరమైన ప్రత్తి పైరు", "Low"),
         "Cotton_Leaf_Curl": ("Cotton", "Cotton Leaf Curl Virus", "ప్రత్తి ఆకు ముడుత వైరస్", "High"),
@@ -167,6 +168,7 @@ class RealDiseaseClassifier(DiseaseClassifier):
             return {
                 "crop": crop_name,
                 "disease": disease_name,
+                "disease_key": class_key,
                 "disease_telugu": telugu_name,
                 "confidence": round(confidence, 4),
                 "risk_level": default_risk,
